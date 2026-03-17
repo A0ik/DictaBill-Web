@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe } from '@/lib/stripe';
+import { getStripe } from '@/lib/stripe';
 import { createSupabaseAdmin } from '@/lib/supabase-server';
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
-  const sig = request.headers.get('stripe-signature')!;
+  const sig = request.headers.get('stripe-signature');
+  if (!sig) return NextResponse.json({ error: 'Missing stripe-signature' }, { status: 400 });
 
   let event;
   try {
-    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
+    event = getStripe().webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 400 });
   }

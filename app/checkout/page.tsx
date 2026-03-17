@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Check, Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -150,7 +150,9 @@ function CheckoutContent() {
 export default function CheckoutPage() {
   return (
     <I18nProvider>
-      <CheckoutContent />
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 size={32} className="animate-spin text-primary-500" /></div>}>
+        <CheckoutContent />
+      </Suspense>
     </I18nProvider>
   );
 }

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Mic, PenLine, Plus, Trash2, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
@@ -29,7 +29,7 @@ const DOC_TYPES: { value: DocumentType; labelKey: string }[] = [
 
 const DEFAULT_ITEM: FormItem = { description: '', quantity: 1, unit_price: 0, vat_rate: 20 };
 
-export default function NewInvoicePage() {
+function NewInvoiceContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t } = useT();
@@ -380,5 +380,13 @@ export default function NewInvoicePage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function NewInvoicePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full" /></div>}>
+      <NewInvoiceContent />
+    </Suspense>
   );
 }

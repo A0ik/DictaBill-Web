@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@layer base {
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    @apply bg-surface text-gray-900 antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 text-white font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95;
+  }
+  .btn-outline {
+    @apply border-2 border-primary-500 text-primary-500 hover:bg-primary-50 font-semibold px-5 py-2.5 rounded-xl transition-all duration-200;
+  }
+  .btn-ghost {
+    @apply text-gray-600 hover:text-gray-900 hover:bg-gray-100 font-medium px-4 py-2 rounded-xl transition-all duration-200;
+  }
+  .card {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm;
+  }
+  .input-base {
+    @apply w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all text-sm bg-white;
+  }
+  .section-badge {
+    @apply inline-flex items-center gap-2 bg-primary-50 text-primary-600 text-sm font-semibold px-4 py-1.5 rounded-full;
+  }
+}
+
+/* Waveform animation */
+@keyframes waveBar {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+.wave-bar {
+  animation: waveBar 1s ease-in-out infinite;
+}
+.wave-bar:nth-child(2) { animation-delay: 0.1s; }
+.wave-bar:nth-child(3) { animation-delay: 0.2s; }
+.wave-bar:nth-child(4) { animation-delay: 0.3s; }
+.wave-bar:nth-child(5) { animation-delay: 0.4s; }

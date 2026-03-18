@@ -1,5 +1,5 @@
 'use client';
-import { Mic2, FileText, Send, BarChart3, RefreshCw } from 'lucide-react';
+import { Mic2, FileText, Send, BarChart3, RefreshCw, FileCode2 } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
 
 const container: Variants = {
@@ -109,6 +109,41 @@ export default function Features() {
             </h3>
             <p className="text-gray-500 text-sm leading-relaxed">
               Les relances partent automatiquement avant et après la date d'échéance. Vous n'avez plus à y penser.
+            </p>
+          </motion.div>
+
+          {/* Card 6 — Factur-X, dark, spans 2 cols */}
+          <motion.div variants={card} whileHover={{ y: -6, scale: 1.01, transition: { duration: 0.25 } }} className="md:col-span-2 bg-[#0D0D0D] text-white rounded-3xl p-8 flex flex-col cursor-default">
+            <div className="flex items-start justify-between mb-6">
+              <div className="w-10 h-10 rounded-xl bg-primary-500/20 flex items-center justify-center">
+                <FileCode2 size={20} className="text-primary-400" />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-primary-500/20 text-primary-400">Pro</span>
+            </div>
+            <h3 className="text-xl font-black mb-3 tracking-tight">
+              Factur-X — Facturation électronique EN 16931
+            </h3>
+            <p className="text-gray-400 text-sm leading-relaxed mb-4">
+              Obligatoire en France dès septembre 2026 pour la facturation B2B. DictaBill génère des PDFs avec XML structuré
+              embarqué (format Factur-X / ZUGFeRD), directement compatibles avec les plateformes EDI et les logiciels comptables.
+            </p>
+            <div className="flex items-center gap-4 mt-auto flex-wrap">
+              <span className="text-xs text-gray-500 font-mono bg-white/10 px-3 py-1.5 rounded-lg">PDF/A-3 + XML</span>
+              <span className="text-xs text-gray-500 font-mono bg-white/10 px-3 py-1.5 rounded-lg">EN 16931 BASIC</span>
+              <span className="text-xs text-gray-500 font-mono bg-white/10 px-3 py-1.5 rounded-lg">Chorus Pro ready</span>
+            </div>
+          </motion.div>
+
+          {/* Card 7 — Factur-X single col */}
+          <motion.div variants={card} whileHover={{ y: -6, scale: 1.02, transition: { duration: 0.25 } }} className="bg-primary-500/10 border border-primary-200 rounded-3xl p-7 flex flex-col cursor-default">
+            <div className="w-10 h-10 rounded-xl bg-primary-500/20 flex items-center justify-center mb-6">
+              <FileCode2 size={20} className="text-primary-600" />
+            </div>
+            <h3 className="text-lg font-black text-[#0D0D0D] mb-2 tracking-tight">
+              Prêt pour 2026
+            </h3>
+            <p className="text-gray-600 text-sm leading-relaxed">
+              La réforme de facturation électronique B2B entre en vigueur en septembre 2026. Avec DictaBill Pro, vous êtes déjà conformes.
             </p>
           </motion.div>
         </motion.div>

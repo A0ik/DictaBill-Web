@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  Printer, Send, CheckCircle, Copy, Trash2, Pencil, Save, X, ArrowLeft, Mail
+  Download, Send, CheckCircle, Copy, Trash2, Pencil, Save, X, ArrowLeft, Mail, Loader2
 } from 'lucide-react';
 import { useDataStore } from '@/stores/dataStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -29,6 +29,7 @@ export default function InvoiceDetailPage() {
   const [sendModal, setSendModal] = useState(false);
   const [sendEmail, setSendEmail] = useState('');
   const [sending, setSending] = useState(false);
+  const [generatingPDF, setGeneratingPDF] = useState(false);
 
   const [notes, setNotes] = useState('');
   const [dueDate, setDueDate] = useState('');
@@ -122,6 +123,45 @@ export default function InvoiceDetailPage() {
     }
   };
 
+  const handleDownloadPDF = async () => {
+    if (!invoice) return;
+    setGeneratingPDF(true);
+    try {
+      const element = document.getElementById('invoice-printable');
+      if (!element) return;
+      const html2canvas = (await import('html2canvas')).default;
+      const jsPDF = (await import('jspdf')).default;
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let y = 0;
+      if (imgHeight <= pageHeight) {
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      } else {
+        // Multi-page support
+        while (y < imgHeight) {
+          pdf.addImage(imgData, 'PNG', 0, -y, imgWidth, imgHeight);
+          y += pageHeight;
+          if (y < imgHeight) pdf.addPage();
+        }
+      }
+      pdf.save(`${invoice.number}.pdf`);
+    } catch (err) {
+      toast.error('Erreur lors de la génération du PDF');
+    } finally {
+      setGeneratingPDF(false);
+    }
+  };
+
   const handleDuplicate = async () => {
     if (!invoice || !profile) return;
     try {
@@ -197,8 +237,9 @@ export default function InvoiceDetailPage() {
               </>
             ) : (
               <>
-                <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5">
-                  <Printer size={14} /> PDF / Imprimer
+                <Button variant="outline" size="sm" onClick={handleDownloadPDF} loading={generatingPDF} className="gap-1.5">
+                  {generatingPDF ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                  Télécharger PDF
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="gap-1.5">
                   <Pencil size={14} /> {t('invoices.editBtn')}

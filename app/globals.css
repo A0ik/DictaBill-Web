@@ -68,14 +68,23 @@
 
 /* Print styles — only show invoice when printing */
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
   body * { visibility: hidden; }
   #invoice-printable, #invoice-printable * { visibility: visible; }
   #invoice-printable {
     position: fixed;
     left: 0;
     top: 0;
-    width: 100%;
-    padding: 2rem;
+    width: 210mm;
+    padding: 0;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
   .no-print { display: none !important; }
 }

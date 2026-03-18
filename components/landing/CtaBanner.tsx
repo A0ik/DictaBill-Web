@@ -32,12 +32,14 @@ export default function CtaBanner() {
           Rejoignez les freelances qui ont arrêté de perdre du temps sur la facturation.
         </motion.p>
         <motion.div variants={fadeUp}>
+          <motion.div whileHover={{ scale: 1.04, transition: { duration: 0.2 } }} className="inline-block">
           <Link
             href="/register"
             className="inline-flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-400 text-white font-semibold px-8 py-4 rounded-xl transition-colors text-base"
           >
             Commencer gratuitement
           </Link>
+          </motion.div>
           <p className="text-gray-600 text-xs mt-6">
             Sans carte bancaire · Résiliation en 1 clic
           </p>

@@ -75,7 +75,8 @@ export default function StatsSection() {
               <motion.div
                 key={i}
                 variants={fadeUp}
-                className={`flex items-baseline gap-3 pb-7 ${i < 2 ? 'border-b border-gray-200' : ''}`}
+                whileHover={{ x: 8, transition: { duration: 0.2 } }}
+                className={`flex items-baseline gap-3 pb-7 cursor-default ${i < 2 ? 'border-b border-gray-200' : ''}`}
               >
                 <span className="text-2xl font-black text-[#0D0D0D]">{stat.value}</span>
                 <span className="text-gray-400 text-sm">/</span>

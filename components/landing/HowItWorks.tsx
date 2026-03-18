@@ -61,7 +61,7 @@ export default function HowItWorks() {
           className="grid md:grid-cols-3 gap-12"
         >
           {STEPS.map((step) => (
-            <motion.div key={step.num} variants={stepVariant} className="flex flex-col">
+            <motion.div key={step.num} variants={stepVariant} whileHover={{ y: -8, transition: { duration: 0.25 } }} className="flex flex-col cursor-default">
               <p
                 className="text-[120px] font-black text-gray-100 leading-none mb-0 select-none"
                 aria-hidden="true"

@@ -41,7 +41,7 @@ export default function Features() {
           className="grid grid-cols-1 md:grid-cols-3 gap-4"
         >
           {/* Card 1 — spans 2 cols, dark */}
-          <motion.div variants={card} className="md:col-span-2 bg-[#0D0D0D] text-white rounded-3xl p-8 flex flex-col">
+          <motion.div variants={card} whileHover={{ y: -6, scale: 1.01, transition: { duration: 0.25 } }} className="md:col-span-2 bg-[#0D0D0D] text-white rounded-3xl p-8 flex flex-col cursor-default">
             <div className="w-10 h-10 rounded-xl bg-primary-500/20 flex items-center justify-center mb-6">
               <Mic2 size={20} className="text-primary-400" />
             </div>
@@ -61,7 +61,7 @@ export default function Features() {
           </motion.div>
 
           {/* Card 2 */}
-          <motion.div variants={card} className="bg-gray-50 rounded-3xl p-7 flex flex-col">
+          <motion.div variants={card} whileHover={{ y: -6, scale: 1.02, transition: { duration: 0.25 } }} className="bg-gray-50 rounded-3xl p-7 flex flex-col cursor-default">
             <div className="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center mb-6">
               <FileText size={20} className="text-gray-700" />
             </div>
@@ -74,7 +74,7 @@ export default function Features() {
           </motion.div>
 
           {/* Card 3 — green */}
-          <motion.div variants={card} className="bg-primary-500 text-white rounded-3xl p-7 flex flex-col">
+          <motion.div variants={card} whileHover={{ y: -6, scale: 1.02, transition: { duration: 0.25 } }} className="bg-primary-500 text-white rounded-3xl p-7 flex flex-col cursor-default">
             <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-6">
               <Send size={20} className="text-white" />
             </div>
@@ -87,7 +87,7 @@ export default function Features() {
           </motion.div>
 
           {/* Card 4 */}
-          <motion.div variants={card} className="bg-gray-50 rounded-3xl p-7 flex flex-col">
+          <motion.div variants={card} whileHover={{ y: -6, scale: 1.02, transition: { duration: 0.25 } }} className="bg-gray-50 rounded-3xl p-7 flex flex-col cursor-default">
             <div className="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center mb-6">
               <BarChart3 size={20} className="text-gray-700" />
             </div>
@@ -100,7 +100,7 @@ export default function Features() {
           </motion.div>
 
           {/* Card 5 */}
-          <motion.div variants={card} className="bg-gray-50 rounded-3xl p-7 flex flex-col">
+          <motion.div variants={card} whileHover={{ y: -6, scale: 1.02, transition: { duration: 0.25 } }} className="bg-gray-50 rounded-3xl p-7 flex flex-col cursor-default">
             <div className="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center mb-6">
               <RefreshCw size={20} className="text-gray-700" />
             </div>

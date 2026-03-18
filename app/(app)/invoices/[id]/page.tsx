@@ -427,7 +427,7 @@ export default function InvoiceDetailPage() {
               {/* Sender info */}
               <div>
                 {profile?.logo_url && (
-                  <img src={profile.logo_url} alt="Logo" className="h-10 mb-4 object-contain" />
+                  <img src={profile.logo_url} alt="Logo" className="h-10 mb-4 object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                 )}
                 <h2 className="text-xl font-black text-gray-900">{profile?.company_name || 'Mon Entreprise'}</h2>
                 {profile?.address && <p className="text-sm text-gray-500 mt-0.5">{profile.address}</p>}

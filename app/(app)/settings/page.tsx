@@ -190,6 +190,7 @@ export default function SettingsPage() {
                   src={previewUrl || form.logo_url}
                   alt="Logo"
                   className="w-full h-full rounded-xl border border-gray-200 object-contain bg-gray-50 transition-transform duration-300 group-hover:scale-[1.02]"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center gap-2">
                   <button

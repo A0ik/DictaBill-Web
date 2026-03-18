@@ -148,8 +148,9 @@ export default function PricingAnimated() {
               }
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className={cn(
-                "relative rounded-3xl border p-8 flex flex-col",
+              whileHover={{ scale: 1.04, transition: { duration: 0.2 } }}
+            className={cn(
+                "relative rounded-3xl border p-8 flex flex-col cursor-default",
                 plan.isPopular
                   ? "border-[#0D0D0D] border-2 bg-[#0D0D0D] text-white"
                   : "border-gray-200 bg-white"

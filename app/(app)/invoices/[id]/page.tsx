@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  Download, Send, CheckCircle, Copy, Trash2, Pencil, Save, X, ArrowLeft, Mail, Loader2, Sparkles, Lock
+  Download, Send, CheckCircle, Copy, Trash2, Pencil, Save, X, ArrowLeft, Mail, Loader2, Sparkles, Lock, FileCode2
 } from 'lucide-react';
 import { useDataStore } from '@/stores/dataStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -21,6 +21,8 @@ import {
   renderTemplate,
   type TemplateId,
 } from '@/lib/invoiceTemplates';
+import { useSubscription } from '@/hooks/useSubscription';
+import { generateFacturXML, embedFacturXInPDF } from '@/lib/facturx';
 
 export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -43,6 +45,8 @@ export default function InvoiceDetailPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateId | null>(null);
   const [templateHtml, setTemplateHtml] = useState<string | null>(null);
   const [templateTab, setTemplateTab] = useState<'templates' | 'ai'>('templates');
+  const [facturxLoading, setFacturxLoading] = useState(false);
+  const { canFacturX } = useSubscription();
 
   const [notes, setNotes] = useState('');
   const [dueDate, setDueDate] = useState('');
@@ -253,6 +257,48 @@ export default function InvoiceDetailPage() {
     }
   };
 
+  const handleDownloadFacturX = async () => {
+    if (!invoice || !profile) return;
+    setFacturxLoading(true);
+    try {
+      const element = document.getElementById('invoice-printable');
+      if (!element) return;
+      const html2canvas = (await import('html2canvas')).default;
+      const jsPDF = (await import('jspdf')).default;
+      const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * pageWidth) / canvas.width;
+      let y = 0;
+      if (imgHeight <= pageHeight) {
+        pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, imgHeight);
+      } else {
+        while (y < imgHeight) {
+          pdf.addImage(imgData, 'PNG', 0, -y, pageWidth, imgHeight);
+          y += pageHeight;
+          if (y < imgHeight) pdf.addPage();
+        }
+      }
+      const pdfBytes = pdf.output('arraybuffer');
+      const xmlString = generateFacturXML(invoice, profile);
+      const facturxBytes = await embedFacturXInPDF(pdfBytes, xmlString, invoice.number);
+      const blob = new Blob([facturxBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${invoice.number}-facturx.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Factur-X téléchargé !');
+    } catch {
+      toast.error('Erreur génération Factur-X');
+    } finally {
+      setFacturxLoading(false);
+    }
+  };
+
   const handleDuplicate = async () => {
     if (!invoice || !profile) return;
     try {
@@ -336,6 +382,19 @@ export default function InvoiceDetailPage() {
                   <Sparkles size={14} className="text-primary-500" />
                   PDF personnalisé IA
                 </Button>
+                {canFacturX ? (
+                  <Button variant="outline" size="sm" onClick={handleDownloadFacturX} loading={facturxLoading} className="gap-1.5">
+                    {facturxLoading ? <Loader2 size={14} className="animate-spin" /> : <FileCode2 size={14} className="text-[#1D9E75]" />}
+                    Factur-X
+                  </Button>
+                ) : (
+                  <button
+                    title="Factur-X disponible avec l'abonnement Pro"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 text-gray-400 cursor-not-allowed"
+                  >
+                    <Lock size={12} /> Factur-X
+                  </button>
+                )}
                 <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="gap-1.5">
                   <Pencil size={14} /> {t('invoices.editBtn')}
                 </Button>

@@ -1,24 +1,24 @@
-'use client';
 import Link from 'next/link';
-import { Mic, ArrowRight } from 'lucide-react';
-import { useT } from '@/hooks/useTranslation';
 
 export default function CtaBanner() {
-  const { t } = useT();
   return (
-    <section className="py-24 bg-white">
+    <section className="bg-[#0D0D0D] py-28">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-        <h2 className="text-4xl sm:text-5xl font-black text-gray-900 mb-4">{t('cta.title')}</h2>
-        <p className="text-lg text-gray-500 mb-10">{t('cta.subtitle')}</p>
+        <h2 className="text-5xl lg:text-6xl font-black text-white tracking-[-0.03em] leading-tight mb-6">
+          Votre prochaine facture en 30 secondes.
+        </h2>
+        <p className="text-gray-400 text-lg mb-10">
+          Rejoignez les freelances qui ont arrêté de perdre du temps sur la facturation.
+        </p>
         <Link
           href="/register"
-          className="inline-flex items-center gap-3 bg-primary-500 hover:bg-primary-600 text-white font-bold px-10 py-5 rounded-2xl text-lg transition-all shadow-xl shadow-primary-200 hover:shadow-2xl hover:shadow-primary-300 active:scale-95"
+          className="inline-flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-400 text-white font-semibold px-8 py-4 rounded-xl transition-colors text-base"
         >
-          <Mic size={22} />
-          {t('cta.btn')}
-          <ArrowRight size={18} />
+          Commencer gratuitement
         </Link>
-        <p className="text-xs text-gray-400 mt-4">{t('cta.sub')}</p>
+        <p className="text-gray-600 text-xs mt-6">
+          Sans carte bancaire · Résiliation en 1 clic
+        </p>
       </div>
     </section>
   );

@@ -1,52 +1,68 @@
-'use client';
-import { useT } from '@/hooks/useTranslation';
-import { Star } from 'lucide-react';
-
-const AVATAR_COLORS = [
-  'bg-primary-500',
-  'bg-blue-500',
-  'bg-amber-500',
-];
-
 export default function Testimonials() {
-  const { t } = useT();
-  const items = t('testimonials.items', { returnObjects: true }) as Array<{ name: string; role: string; text: string; avatar: string }>;
-
   return (
-    <section className="py-24 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-14">
-          <span className="section-badge">{t('testimonials.badge')}</span>
-          <h2 className="mt-4 text-4xl font-black text-gray-900">{t('testimonials.title')}</h2>
+    <section className="py-28 bg-white">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Featured large quote */}
+        <div className="text-center mb-20">
+          <div
+            className="text-[120px] leading-none font-serif text-primary-100 select-none"
+            aria-hidden="true"
+          >
+            "
+          </div>
+          <blockquote className="-mt-10">
+            <p className="text-2xl font-medium text-[#0D0D0D] leading-relaxed max-w-2xl mx-auto">
+              J'ai créé ma première facture pendant que je raccrochais le téléphone avec mon client.
+              Mon comptable n'en revient pas.
+            </p>
+            <footer className="mt-8 flex items-center justify-center gap-3">
+              <div
+                className="w-8 h-8 rounded-full border-2 border-white shadow-sm"
+                style={{ backgroundColor: '#1D9E75' }}
+              />
+              <div className="text-left">
+                <p className="text-sm font-semibold text-[#0D0D0D]">Camille R.</p>
+                <p className="text-xs text-gray-400">Consultante SEO, Paris</p>
+              </div>
+            </footer>
+          </blockquote>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {items.map((item, i) => (
-            <div key={i} className="bg-white rounded-2xl p-7 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col">
-              {/* Stars */}
-              <div className="flex gap-0.5 mb-5">
-                {Array.from({ length: 5 }).map((_, s) => (
-                  <Star key={s} size={14} className="text-amber-400 fill-amber-400" />
-                ))}
+        {/* Two smaller quotes */}
+        <div className="grid md:grid-cols-2 gap-6 mt-16">
+          <blockquote className="border border-gray-100 rounded-2xl p-6">
+            <p className="text-gray-600 text-sm leading-relaxed mb-6">
+              "Finies les nuits à faire de la paperasse. Je dicte, DictaBill génère, j'envoie.
+              Ça prend moins de temps que de trouver le bon template Word."
+            </p>
+            <footer className="flex items-center gap-3">
+              <div
+                className="w-7 h-7 rounded-full shrink-0"
+                style={{ backgroundColor: '#2563EB' }}
+              />
+              <div>
+                <p className="text-sm font-semibold text-[#0D0D0D]">Mehdi L.</p>
+                <p className="text-xs text-gray-400">Développeur freelance</p>
               </div>
+            </footer>
+          </blockquote>
 
-              {/* Quote */}
-              <p className="text-gray-600 text-sm leading-relaxed flex-1">
-                &ldquo;{item.text}&rdquo;
-              </p>
-
-              {/* Author */}
-              <div className="flex items-center gap-3 mt-6 pt-5 border-t border-gray-100">
-                <div className={`w-10 h-10 rounded-full ${AVATAR_COLORS[i % AVATAR_COLORS.length]} flex items-center justify-center text-white font-bold text-sm`}>
-                  {item.avatar}
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-gray-900">{item.name}</p>
-                  <p className="text-xs text-gray-400">{item.role}</p>
-                </div>
+          <blockquote className="border border-gray-100 rounded-2xl p-6">
+            <p className="text-gray-600 text-sm leading-relaxed mb-6">
+              "J'avais peur que ce soit un gadget. Après 3 mois, c'est l'outil que j'ouvre en premier."
+            </p>
+            <footer className="flex items-center gap-3">
+              <div
+                className="w-7 h-7 rounded-full shrink-0"
+                style={{ backgroundColor: '#8B5CF6' }}
+              />
+              <div>
+                <p className="text-sm font-semibold text-[#0D0D0D]">Lucie V.</p>
+                <p className="text-xs text-gray-400">Designer UX, Lyon</p>
               </div>
-            </div>
-          ))}
+            </footer>
+          </blockquote>
         </div>
       </div>
     </section>

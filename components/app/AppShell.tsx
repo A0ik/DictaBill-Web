@@ -27,17 +27,14 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
   return (
     <div className="fixed inset-0 z-40 md:hidden">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="absolute left-0 top-0 bottom-0 w-64 bg-white shadow-2xl z-50 flex flex-col">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-          <span className="text-xl font-black">
-            <span className="text-primary-500">Dicta</span>
-            <span className="text-gray-900">Bill</span>
-          </span>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-            <X size={18} className="text-gray-500" />
+      <div className="absolute left-0 top-0 bottom-0 w-56 bg-[#0D0D0D] shadow-2xl z-50 flex flex-col">
+        <div className="flex items-center justify-between px-5 py-5">
+          <span className="text-lg font-black text-white tracking-tight">DictaBill</span>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10 transition-colors">
+            <X size={18} className="text-gray-400" />
           </button>
         </div>
-        <nav className="flex-1 px-3 py-4 space-y-1">
+        <nav className="flex-1 px-3 py-2 space-y-0.5">
           {NAV_ITEMS.map(({ href, icon: Icon, key }) => {
             const isActive = pathname === href || pathname.startsWith(href + '/');
             return (
@@ -46,27 +43,27 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
                 href={href}
                 onClick={onClose}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all',
+                  'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all',
                   isActive
-                    ? 'bg-primary-50 text-primary-700'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ? 'text-white bg-white/10 font-semibold'
+                    : 'text-gray-400 hover:text-white hover:bg-white/5 font-medium'
                 )}
               >
-                <Icon size={18} className={isActive ? 'text-primary-600' : 'text-gray-400'} />
+                <Icon size={16} className={isActive ? 'text-white' : 'text-gray-500'} />
                 {t(key as any)}
               </Link>
             );
           })}
         </nav>
-        <div className="px-3 py-4 border-t border-gray-100">
+        <div className="px-3 py-4 space-y-0.5">
           {user?.email && (
-            <p className="px-3 py-2 text-xs text-gray-400 truncate mb-1">{user.email}</p>
+            <p className="px-3 py-2 text-xs text-gray-600 truncate">{user.email}</p>
           )}
           <button
             onClick={() => { signOut(); onClose(); }}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-red-400 hover:bg-white/5 transition-all"
           >
-            <LogOut size={18} /> {t('nav.logout')}
+            <LogOut size={16} /> {t('nav.logout')}
           </button>
         </div>
       </div>

@@ -9,7 +9,7 @@
   html { scroll-behavior: smooth; }
   body {
     font-family: 'Inter', system-ui, sans-serif;
-    @apply bg-surface text-gray-900 antialiased;
+    @apply bg-white text-gray-900 antialiased;
   }
 }
 
@@ -29,12 +29,27 @@
   .input-base {
     @apply w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all text-sm bg-white;
   }
-  .section-badge {
-    @apply inline-flex items-center gap-2 bg-primary-50 text-primary-600 text-sm font-semibold px-4 py-1.5 rounded-full;
+
+  /* Editorial display heading utility */
+  .display-heading {
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+  }
+
+  /* Ink color utility */
+  .ink {
+    color: #0D0D0D;
+  }
+
+  /* Subtle dot-grid background */
+  .bg-grid {
+    background-image: radial-gradient(circle, rgba(0,0,0,0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
   }
 }
 
-/* Floating animations for hero badges */
+/* Floating animations — kept for compatibility but not used in hero */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-6px); }

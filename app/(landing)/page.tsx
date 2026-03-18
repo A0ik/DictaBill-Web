@@ -7,10 +7,11 @@ import Features from '@/components/landing/Features';
 import HowItWorks from '@/components/landing/HowItWorks';
 import AppPreviewSection from '@/components/landing/AppPreviewSection';
 import Testimonials from '@/components/landing/Testimonials';
-import PricingSection from '@/components/landing/PricingSection';
+import PricingAnimated from '@/components/landing/PricingAnimated';
 import CtaBanner from '@/components/landing/CtaBanner';
 import Footer from '@/components/landing/Footer';
 import ExitIntentPopup from '@/components/landing/ExitIntentPopup';
+import TimedDemoPopup from '@/components/landing/TimedDemoPopup';
 
 export default function LandingPage() {
   return (
@@ -24,11 +25,12 @@ export default function LandingPage() {
         <HowItWorks />
         <AppPreviewSection />
         <Testimonials />
-        <PricingSection />
+        <PricingAnimated />
         <CtaBanner />
       </main>
       <Footer />
       <ExitIntentPopup />
+      <TimedDemoPopup />
     </I18nProvider>
   );
 }

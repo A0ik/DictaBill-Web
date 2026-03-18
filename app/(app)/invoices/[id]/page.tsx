@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  Download, Send, CheckCircle, Copy, Trash2, Pencil, Save, X, ArrowLeft, Mail, Loader2, Sparkles
+  Download, Send, CheckCircle, Copy, Trash2, Pencil, Save, X, ArrowLeft, Mail, Loader2, Sparkles, Lock
 } from 'lucide-react';
 import { useDataStore } from '@/stores/dataStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -15,6 +15,12 @@ import Modal from '@/components/ui/Modal';
 import toast from 'react-hot-toast';
 import type { Invoice, InvoiceItem } from '@/types';
 import Link from 'next/link';
+import {
+  INVOICE_TEMPLATES,
+  canUseTemplate,
+  renderTemplate,
+  type TemplateId,
+} from '@/lib/invoiceTemplates';
 
 export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -34,6 +40,9 @@ export default function InvoiceDetailPage() {
   const [aiStyle, setAiStyle] = useState('');
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiHtml, setAiHtml] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateId | null>(null);
+  const [templateHtml, setTemplateHtml] = useState<string | null>(null);
+  const [templateTab, setTemplateTab] = useState<'templates' | 'ai'>('templates');
 
   const [notes, setNotes] = useState('');
   const [dueDate, setDueDate] = useState('');
@@ -206,6 +215,39 @@ export default function InvoiceDetailPage() {
       pdf.save(`${invoice.number}.pdf`);
     } catch (err) {
       toast.error('Erreur lors de la génération du PDF');
+    } finally {
+      setGeneratingPDF(false);
+    }
+  };
+
+  const handleApplyTemplate = (tplId: TemplateId) => {
+    if (!invoice || !profile) return;
+    setSelectedTemplate(tplId);
+    const html = renderTemplate(tplId, { invoice, profile });
+    setTemplateHtml(html);
+  };
+
+  const handleDownloadTemplatePDF = async () => {
+    if (!templateHtml || !invoice) return;
+    setGeneratingPDF(true);
+    try {
+      const container = document.createElement('div');
+      container.innerHTML = templateHtml;
+      container.style.cssText = 'position:fixed;top:0;left:0;width:794px;background:white;z-index:-9999;visibility:hidden;';
+      document.body.appendChild(container);
+      const html2canvas = (await import('html2canvas')).default;
+      const jsPDF = (await import('jspdf')).default;
+      const canvas = await html2canvas(container, { scale: 2, useCORS: true, backgroundColor: null, logging: false });
+      document.body.removeChild(container);
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const imgData = canvas.toDataURL('image/png');
+      const pageWidth = 210;
+      const imgHeight = (canvas.height * pageWidth) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, Math.min(imgHeight, 297));
+      pdf.save(`${invoice.number}-${selectedTemplate}.pdf`);
+      setAiModal(false);
+    } catch {
+      toast.error('Erreur génération PDF');
     } finally {
       setGeneratingPDF(false);
     }
@@ -467,52 +509,135 @@ export default function InvoiceDetailPage() {
         </div>
       </div>
 
-      {/* AI PDF modal */}
-      <Modal open={aiModal} onClose={() => setAiModal(false)} title="Générer un PDF personnalisé par IA">
+      {/* PDF Templates modal */}
+      <Modal open={aiModal} onClose={() => { setAiModal(false); setTemplateHtml(null); setSelectedTemplate(null); setAiHtml(null); }} title="Choisir un template de facture">
         <div className="px-6 py-5 space-y-4">
-          {!aiHtml ? (
+          {/* Tabs */}
+          <div className="flex gap-1 bg-gray-100 rounded-xl p-1">
+            <button
+              onClick={() => setTemplateTab('templates')}
+              className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${templateTab === 'templates' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Templates
+            </button>
+            <button
+              onClick={() => setTemplateTab('ai')}
+              className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1 ${templateTab === 'ai' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              <Sparkles size={11} /> IA personnalisé
+            </button>
+          </div>
+
+          {/* Templates tab */}
+          {templateTab === 'templates' && (
             <>
-              <p className="text-sm text-gray-500">
-                Décrivez le style souhaité pour votre facture. L&apos;IA génère un template HTML unique basé sur votre description.
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                {['Moderne minimaliste', 'Sombre et premium', 'Coloré et créatif', 'Classique professionnel'].map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setAiStyle(s)}
-                    className={`px-3 py-2 rounded-lg text-xs font-semibold border-2 transition-all text-left ${
-                      aiStyle === s ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-              <input
-                className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300 placeholder:text-gray-400"
-                placeholder="ou décrivez librement… ex: fond noir, accent violet, typographie moderne"
-                value={aiStyle}
-                onChange={(e) => setAiStyle(e.target.value)}
-              />
-              <Button onClick={handleGenerateAiPDF} loading={aiGenerating} fullWidth className="gap-2">
-                <Sparkles size={15} />
-                {aiGenerating ? 'Génération en cours…' : 'Générer le template'}
-              </Button>
+              {!templateHtml ? (
+                <>
+                  <p className="text-xs text-gray-400">Sélectionnez un template. Solo et Pro débloquent des designs supplémentaires.</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {INVOICE_TEMPLATES.map((tpl) => {
+                      const unlocked = canUseTemplate(tpl.id, profile?.subscription_tier);
+                      return (
+                        <button
+                          key={tpl.id}
+                          onClick={() => unlocked && handleApplyTemplate(tpl.id)}
+                          className={`relative rounded-xl border-2 overflow-hidden text-left transition-all ${
+                            selectedTemplate === tpl.id
+                              ? 'border-primary-500'
+                              : unlocked
+                              ? 'border-gray-200 hover:border-gray-300'
+                              : 'border-gray-100 opacity-60 cursor-not-allowed'
+                          }`}
+                        >
+                          <div className="h-20 w-full" style={{ background: tpl.preview }} />
+                          <div className="p-3">
+                            <div className="flex items-center justify-between gap-1">
+                              <span className="text-xs font-bold text-gray-900">{tpl.name}</span>
+                              {!unlocked && <Lock size={11} className="text-gray-400 flex-shrink-0" />}
+                              {tpl.tier !== 'free' && (
+                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wide ${tpl.tier === 'pro' ? 'bg-[#0D0D0D] text-white' : 'bg-primary-100 text-primary-700'}`}>
+                                  {tpl.tier}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-gray-400 mt-0.5">{tpl.description}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <Button onClick={() => selectedTemplate && handleApplyTemplate(selectedTemplate)} disabled={!selectedTemplate} fullWidth>
+                    Prévisualiser
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <div
+                    className="border border-gray-200 rounded-xl overflow-auto max-h-96 bg-white"
+                    style={{ transform: 'scale(0.6)', transformOrigin: 'top left', width: '167%', height: 380 }}
+                    dangerouslySetInnerHTML={{ __html: templateHtml }}
+                  />
+                  <div className="flex gap-3">
+                    <Button onClick={handleDownloadTemplatePDF} loading={generatingPDF} fullWidth className="gap-2">
+                      <Download size={14} /> Télécharger ce PDF
+                    </Button>
+                    <Button variant="ghost" onClick={() => { setTemplateHtml(null); setSelectedTemplate(null); }} className="gap-1.5 whitespace-nowrap">
+                      ← Changer
+                    </Button>
+                  </div>
+                </>
+              )}
             </>
-          ) : (
+          )}
+
+          {/* AI tab */}
+          {templateTab === 'ai' && (
             <>
-              <div
-                className="border border-gray-200 rounded-xl overflow-auto max-h-96 bg-white p-4 text-xs"
-                dangerouslySetInnerHTML={{ __html: aiHtml }}
-              />
-              <div className="flex gap-3">
-                <Button onClick={handleDownloadAiPDF} loading={generatingPDF} fullWidth className="gap-2">
-                  <Download size={14} /> Télécharger ce PDF
-                </Button>
-                <Button variant="ghost" onClick={() => setAiHtml(null)} className="gap-1.5">
-                  <Sparkles size={14} /> Régénérer
-                </Button>
-              </div>
+              {!aiHtml ? (
+                <>
+                  <p className="text-sm text-gray-500">
+                    Décrivez le style souhaité. L&apos;IA génère un template HTML unique.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['Moderne minimaliste', 'Sombre et premium', 'Coloré et créatif', 'Classique professionnel'].map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => setAiStyle(s)}
+                        className={`px-3 py-2 rounded-lg text-xs font-semibold border-2 transition-all text-left ${
+                          aiStyle === s ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300 placeholder:text-gray-400"
+                    placeholder="ex: fond noir, accent violet, typographie moderne"
+                    value={aiStyle}
+                    onChange={(e) => setAiStyle(e.target.value)}
+                  />
+                  <Button onClick={handleGenerateAiPDF} loading={aiGenerating} fullWidth className="gap-2">
+                    <Sparkles size={15} />
+                    {aiGenerating ? 'Génération en cours…' : 'Générer le template IA'}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <div
+                    className="border border-gray-200 rounded-xl overflow-auto max-h-96 bg-white p-4 text-xs"
+                    dangerouslySetInnerHTML={{ __html: aiHtml }}
+                  />
+                  <div className="flex gap-3">
+                    <Button onClick={handleDownloadAiPDF} loading={generatingPDF} fullWidth className="gap-2">
+                      <Download size={14} /> Télécharger ce PDF
+                    </Button>
+                    <Button variant="ghost" onClick={() => setAiHtml(null)} className="gap-1.5">
+                      <Sparkles size={14} /> Régénérer
+                    </Button>
+                  </div>
+                </>
+              )}
             </>
           )}
         </div>

@@ -1,10 +1,13 @@
 'use client';
 import Link from 'next/link';
+import { useState } from 'react';
 import { useT } from '@/hooks/useTranslation';
 import { Mic, ArrowRight, Play, CheckCircle2, CreditCard, TrendingUp } from 'lucide-react';
+import DemoModal from '@/components/landing/DemoModal';
 
 export default function Hero() {
   const { t } = useT();
+  const [demoOpen, setDemoOpen] = useState(false);
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white pt-16">
@@ -21,9 +24,9 @@ export default function Hero() {
           </div>
 
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.05] tracking-tight mb-6">
-            <span className="text-gray-900 block">{t('hero.title')}</span>
+            <span className="text-gray-900 block">Facture en</span>
             <span className="relative inline-block text-primary-500">
-              {t('hero.titleAccent')}
+              30 secondes.
               <svg className="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 6" fill="none" preserveAspectRatio="none">
                 <path d="M0 5 Q50 1 100 4 Q150 7 200 3" stroke="#1D9E75" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
               </svg>
@@ -31,7 +34,7 @@ export default function Hero() {
           </h1>
 
           <p className="text-lg text-gray-500 leading-relaxed mb-10 max-w-lg mx-auto lg:mx-0">
-            {t('hero.subtitle')}
+            L'app de facturation des freelancers qui n'ont pas le temps. Tu parles, l'IA crée ta facture et l'envoie.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-10">
@@ -43,11 +46,14 @@ export default function Hero() {
               {t('hero.cta')}
               <ArrowRight size={16} />
             </Link>
-            <button className="inline-flex items-center justify-center gap-2 bg-white text-gray-700 font-semibold px-6 py-3.5 rounded-xl text-base border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all">
+            <button
+              onClick={() => setDemoOpen(true)}
+              className="inline-flex items-center justify-center gap-2 bg-white text-gray-700 font-semibold px-6 py-3.5 rounded-xl text-base border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all"
+            >
               <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
                 <Play size={10} className="text-white fill-white ml-0.5" />
               </div>
-              {t('hero.demo')}
+              Essaier sans inscription
             </button>
           </div>
 
@@ -187,6 +193,7 @@ export default function Hero() {
           </div>
         </div>
       </div>
+      <DemoModal open={demoOpen} onClose={() => setDemoOpen(false)} />
     </section>
   );
 }

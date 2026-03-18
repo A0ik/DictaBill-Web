@@ -2,12 +2,12 @@ const STEPS = [
   {
     num: '01',
     title: 'Dictez en une phrase',
-    desc: 'Dites simplement : "Facture pour Acme, développement web, 2 400€ HT, délai 30 jours". C'est tout.',
+    desc: "Dites simplement : \"Facture pour Acme, développement web, 2 400€ HT, délai 30 jours\". C'est tout.",
     example: '"Facture pour Acme, 2 400€ HT, 30 jours"',
   },
   {
     num: '02',
-    title: 'L'IA génère la facture',
+    title: "L'IA génère la facture",
     desc: 'Groq Whisper transcrit, LLaMA extrait les données. Votre facture est prête en quelques secondes, mise en page comprise.',
     example: null,
   },

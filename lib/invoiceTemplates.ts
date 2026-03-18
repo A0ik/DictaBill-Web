@@ -1,6 +1,6 @@
 import type { Invoice, Profile } from '@/types';
 
-export type TemplateId = 'classic' | 'modern' | 'minimal' | 'dark';
+export type TemplateId = 'classic' | 'modern' | 'minimal' | 'dark' | 'custom';
 
 export interface InvoiceTemplate {
   id: TemplateId;
@@ -38,6 +38,13 @@ export const INVOICE_TEMPLATES: InvoiceTemplate[] = [
     description: 'Fond noir, accents lumineux.',
     tier: 'pro',
     preview: 'linear-gradient(135deg, #0D0D0D 0%, #1a1a2e 100%)',
+  },
+  {
+    id: 'custom',
+    name: 'Ma Template',
+    description: 'Générée par IA depuis votre propre facture.',
+    tier: 'solo',
+    preview: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
   },
 ];
 
@@ -329,6 +336,43 @@ export function renderTemplate(templateId: TemplateId, data: TemplateData): stri
     </div>
   </div>
 </div>`;
+
+    case 'custom': {
+      if (!profile.custom_template_html) return renderTemplate('classic', data);
+      const clientName2 = invoice.client?.name || invoice.client_name_override || '';
+      const clientAddr2 = [
+        invoice.client?.address,
+        `${invoice.client?.postal_code || ''} ${invoice.client?.city || ''}`.trim(),
+        invoice.client?.email,
+      ].filter(Boolean).join('<br/>');
+      const rows2 = invoice.items.map((it) => `
+        <tr>
+          <td style="padding:10px 14px;font-size:13px;border-bottom:1px solid #f3f4f6">${it.description}</td>
+          <td style="padding:10px 14px;font-size:13px;text-align:center;border-bottom:1px solid #f3f4f6">${it.quantity}</td>
+          <td style="padding:10px 14px;font-size:13px;text-align:right;border-bottom:1px solid #f3f4f6">${formatNum(it.unit_price)} €</td>
+          <td style="padding:10px 14px;font-size:13px;text-align:right;border-bottom:1px solid #f3f4f6">${it.vat_rate}%</td>
+          <td style="padding:10px 14px;font-size:13px;font-weight:700;text-align:right;border-bottom:1px solid #f3f4f6">${formatNum(it.quantity * it.unit_price)} €</td>
+        </tr>`).join('');
+      return profile.custom_template_html
+        .replace(/\{\{NUMBER\}\}/g, invoice.number)
+        .replace(/\{\{ISSUE_DATE\}\}/g, invoice.issue_date)
+        .replace(/\{\{DUE_DATE\}\}/g, invoice.due_date || '')
+        .replace(/\{\{CLIENT_NAME\}\}/g, clientName2)
+        .replace(/\{\{CLIENT_ADDRESS\}\}/g, invoice.client?.address || '')
+        .replace(/\{\{CLIENT_CITY\}\}/g, `${invoice.client?.postal_code || ''} ${invoice.client?.city || ''}`.trim())
+        .replace(/\{\{CLIENT_EMAIL\}\}/g, invoice.client?.email || '')
+        .replace(/\{\{COMPANY_NAME\}\}/g, profile.company_name || '')
+        .replace(/\{\{COMPANY_ADDRESS\}\}/g, profile.address || '')
+        .replace(/\{\{COMPANY_CITY\}\}/g, `${profile.postal_code || ''} ${profile.city || ''}`.trim())
+        .replace(/\{\{SIRET\}\}/g, profile.siret || '')
+        .replace(/\{\{VAT_NUMBER\}\}/g, profile.vat_number || '')
+        .replace(/\{\{ITEMS_ROWS\}\}/g, rows2)
+        .replace(/\{\{SUBTOTAL\}\}/g, formatNum(invoice.subtotal))
+        .replace(/\{\{VAT\}\}/g, formatNum(invoice.vat_amount))
+        .replace(/\{\{TOTAL\}\}/g, formatNum(invoice.total))
+        .replace(/\{\{NOTES\}\}/g, invoice.notes || '')
+        .replace(/\{\{ACCENT_COLOR\}\}/g, profile.accent_color || '#1D9E75');
+    }
 
     default:
       return '';

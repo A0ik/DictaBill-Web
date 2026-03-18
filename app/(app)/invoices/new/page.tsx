@@ -21,11 +21,40 @@ interface FormItem {
   vat_rate: number;
 }
 
-const DOC_TYPES: { value: DocumentType; labelKey: string }[] = [
-  { value: 'invoice', labelKey: 'dashboard.invoice' },
-  { value: 'quote', labelKey: 'dashboard.quote' },
-  { value: 'credit_note', labelKey: 'dashboard.creditNote' },
-];
+const DOC_CONFIG: Record<DocumentType, {
+  labelKey: string;
+  color: string;
+  bg: string;
+  text: string;
+  border: string;
+  example: string;
+}> = {
+  invoice: {
+    labelKey: 'dashboard.invoice',
+    color: '#1D9E75',
+    bg: 'bg-[#1D9E75]/10',
+    text: 'text-[#1D9E75]',
+    border: 'border-[#1D9E75]',
+    example: 'Facture Acme Corp, développement web, 2 400€ HT, paiement 30 jours',
+  },
+  quote: {
+    labelKey: 'dashboard.quote',
+    color: '#3B82F6',
+    bg: 'bg-blue-50',
+    text: 'text-blue-700',
+    border: 'border-blue-500',
+    example: 'Devis pour refonte site internet, client Martin Dupont, 1 800€ HT',
+  },
+  credit_note: {
+    labelKey: 'dashboard.creditNote',
+    color: '#8B5CF6',
+    bg: 'bg-purple-50',
+    text: 'text-purple-700',
+    border: 'border-purple-500',
+    example: 'Avoir pour annulation de prestation, 500€, client Acme Corp',
+  },
+};
+const DOC_TYPES = Object.keys(DOC_CONFIG) as DocumentType[];
 
 const DEFAULT_ITEM: FormItem = { description: '', quantity: 1, unit_price: 0, vat_rate: 20 };
 
@@ -51,6 +80,7 @@ function NewInvoiceContent() {
   const [items, setItems] = useState<FormItem[]>([{ ...DEFAULT_ITEM }]);
   const [notes, setNotes] = useState('');
   const [voiceTranscript, setVoiceTranscript] = useState('');
+  const cfg = DOC_CONFIG[docType];
 
   useEffect(() => {
     fetchClients();
@@ -167,20 +197,23 @@ function NewInvoiceContent() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
           <p className="text-sm font-bold text-gray-700 mb-3">Type de document</p>
           <div className="flex gap-2">
-            {DOC_TYPES.map(({ value, labelKey }) => (
-              <button
-                key={value}
-                onClick={() => setDocType(value)}
-                className={cn(
-                  'flex-1 py-2 px-3 rounded-xl text-sm font-semibold border-2 transition-all',
-                  docType === value
-                    ? 'border-primary-500 bg-primary-50 text-primary-700'
-                    : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                )}
-              >
-                {t(labelKey as any)}
-              </button>
-            ))}
+            {DOC_TYPES.map((value) => {
+              const c = DOC_CONFIG[value];
+              const active = docType === value;
+              return (
+                <button
+                  key={value}
+                  onClick={() => setDocType(value)}
+                  style={active ? { borderColor: c.color, backgroundColor: c.color + '15', color: c.color } : {}}
+                  className={cn(
+                    'flex-1 py-2 px-3 rounded-xl text-sm font-semibold border-2 transition-all',
+                    active ? '' : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                  )}
+                >
+                  {t(c.labelKey as any)}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -213,7 +246,7 @@ function NewInvoiceContent() {
             <VoiceRecorder
               onRecordingComplete={handleRecordingComplete}
               loading={transcribing}
-              exampleText={t('invoices.voiceExample')}
+              exampleText={cfg.example}
               disabled={limitReached}
             />
             {voiceTranscript && (
@@ -373,6 +406,7 @@ function NewInvoiceContent() {
               fullWidth
               size="lg"
               disabled={limitReached}
+              style={{ backgroundColor: cfg.color, borderColor: cfg.color }}
             >
               {t('invoices.createBtn')}
             </Button>

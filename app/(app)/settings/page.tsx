@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Upload, Loader2, Lock, ExternalLink, LogOut, AlertTriangle, Check, ImagePlus, Trash2 } from 'lucide-react';
+import { Upload, Loader2, Lock, ExternalLink, LogOut, AlertTriangle, Check, ImagePlus, Trash2, FileUp, Wand2 } from 'lucide-react';
 import { useImageUpload } from '@/components/hooks/use-image-upload';
 import { useAuthStore } from '@/stores/authStore';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -26,11 +26,14 @@ export default function SettingsPage() {
   const router = useRouter();
   const { t, lang, i18n } = useT();
   const { profile, updateProfile, signOut } = useAuthStore();
-  const { tier, isFree, isPro } = useSubscription();
+  const { tier, isFree, isSolo, isPro } = useSubscription();
 
   const [saving, setSaving] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
+  const [customTplFile, setCustomTplFile] = useState<File | null>(null);
+  const [customTplLoading, setCustomTplLoading] = useState(false);
+  const [customTplPreview, setCustomTplPreview] = useState<string | null>(null);
   const { previewUrl, fileInputRef, handleThumbnailClick, handleFileChange: hookFileChange, handleRemove } = useImageUpload();
 
   const [form, setForm] = useState({
@@ -141,6 +144,25 @@ export default function SettingsPage() {
   const handleSignOut = async () => {
     await signOut();
     router.push('/login');
+  };
+
+  const handleAnalyzeTemplate = async () => {
+    if (!customTplFile) return;
+    setCustomTplLoading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', customTplFile);
+      const res = await fetch('/api/analyze-template', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setCustomTplPreview(data.html);
+      await updateProfile({ custom_template_html: data.html } as any);
+      toast.success('Template sauvegardée !');
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setCustomTplLoading(false);
+    }
   };
 
   const tierLabels: Record<string, string> = {
@@ -272,6 +294,62 @@ export default function SettingsPage() {
             </div>
           </div>
         </section>
+
+        {/* Custom template — Solo+ */}
+        {isSolo && (
+          <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-gray-900">Template personnalisée IA</h2>
+              <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-[#1D9E75]/10 text-[#1D9E75]">Solo+</span>
+            </div>
+            <p className="text-sm text-gray-500">
+              Uploadez une de vos factures (PDF ou image). L'IA analyse son style et génère une template HTML réutilisable pour tous vos futurs documents.
+            </p>
+
+            <div className="flex flex-col gap-3">
+              <label className="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-200 rounded-xl hover:border-[#1D9E75]/50 hover:bg-[#1D9E75]/5 transition-all cursor-pointer">
+                <FileUp size={18} className="text-gray-400 shrink-0" />
+                <span className="text-sm text-gray-500 flex-1 truncate">
+                  {customTplFile ? customTplFile.name : 'Choisir un fichier (PDF, PNG, JPG)'}
+                </span>
+                <input
+                  type="file"
+                  accept=".pdf,.png,.jpg,.jpeg"
+                  className="hidden"
+                  onChange={(e) => setCustomTplFile(e.target.files?.[0] || null)}
+                />
+              </label>
+
+              {profile?.custom_template_html && !customTplPreview && (
+                <div className="flex items-center gap-2 text-xs text-[#1D9E75] font-semibold">
+                  <Check size={13} /> Template sauvegardée — vous pouvez en uploader une nouvelle
+                </div>
+              )}
+
+              <Button
+                onClick={handleAnalyzeTemplate}
+                loading={customTplLoading}
+                disabled={!customTplFile}
+                className="gap-2 w-full"
+                variant="outline"
+              >
+                <Wand2 size={15} />
+                {customTplLoading ? 'Analyse en cours…' : 'Analyser avec l\'IA'}
+              </Button>
+            </div>
+
+            {customTplPreview && (
+              <div>
+                <p className="text-xs font-semibold text-gray-500 mb-2">Aperçu de votre template :</p>
+                <div
+                  className="border border-gray-200 rounded-xl overflow-hidden bg-white"
+                  style={{ transform: 'scale(0.55)', transformOrigin: 'top left', width: '182%', height: 340, pointerEvents: 'none' }}
+                  dangerouslySetInnerHTML={{ __html: customTplPreview }}
+                />
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Language */}
         <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">

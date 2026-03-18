@@ -17,6 +17,8 @@ interface Plan {
   yearlyPrice: number;
   description: string;
   features: string[];
+  disadvantages?: string[];
+  annualSaving?: number; // € saved per year vs monthly
   cta: string;
   href: string;
   isPopular: boolean;
@@ -35,6 +37,13 @@ const plans: Plan[] = [
       "PDF conforme",
       "1 utilisateur",
     ],
+    disadvantages: [
+      '5 factures/mois maximum',
+      'Pas d\'export CSV',
+      'Pas de relances auto',
+      'Pas de Factur-X',
+      'Filigrane DictaBill',
+    ],
     cta: "Commencer gratuitement",
     href: "/register",
     isPopular: false,
@@ -52,6 +61,12 @@ const plans: Plan[] = [
       "Export comptable CSV",
       "Support prioritaire",
     ],
+    disadvantages: [
+      'Pas de Factur-X (EDI)',
+      'Pas de paiement Stripe intégré',
+      'Pas d\'accès API',
+    ],
+    annualSaving: Math.round((9.99 - 7.99) * 12),
     cta: "Démarrer Solo",
     href: "/checkout?plan=solo&interval=monthly",
     isPopular: true,
@@ -69,6 +84,7 @@ const plans: Plan[] = [
       "Intégration Stripe",
       "API accès",
     ],
+    annualSaving: Math.round((19.99 - 15.99) * 12),
     cta: "Démarrer Pro",
     href: "/checkout?plan=pro&interval=monthly",
     isPopular: false,
@@ -190,9 +206,17 @@ export default function PricingAnimated() {
                 <p className={cn("text-xs", plan.isPopular ? "text-gray-500" : "text-gray-400")}>
                   {plan.description}
                 </p>
+                {isAnnual && plan.annualSaving && (
+                  <div className={cn(
+                    "inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full mt-1",
+                    plan.isPopular ? "bg-primary-500/20 text-primary-400" : "bg-green-100 text-green-700"
+                  )}>
+                    💰 Vous économisez {plan.annualSaving}€/an
+                  </div>
+                )}
               </div>
 
-              <ul className="space-y-2.5 flex-1 mb-8">
+              <ul className="space-y-2.5 mb-4">
                 {plan.features.map((feature, i) => (
                   <li key={i} className="flex items-start gap-2.5">
                     <Check
@@ -205,6 +229,18 @@ export default function PricingAnimated() {
                   </li>
                 ))}
               </ul>
+
+              {plan.disadvantages && (
+                <ul className="space-y-1.5 flex-1 mb-8 pt-3 border-t border-gray-100">
+                  {plan.disadvantages.map((d, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-red-400 text-xs shrink-0 mt-0.5 font-bold">✕</span>
+                      <span className={cn("text-xs", plan.isPopular ? "text-gray-400" : "text-gray-400")}>{d}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {!plan.disadvantages && <div className="flex-1 mb-8" />}
 
               <Link
                 href={plan.isFree ? plan.href : `${plan.href.split('&')[0]}&interval=${isAnnual ? 'annual' : 'monthly'}`}

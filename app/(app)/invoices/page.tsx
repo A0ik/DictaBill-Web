@@ -1,11 +1,11 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import { Search, Plus, Mic, PenLine, ChevronDown, Download } from 'lucide-react';
+import { Search, Plus, Mic, PenLine, ChevronDown, Download, Menu } from 'lucide-react';
 import { useDataStore } from '@/stores/dataStore';
 import { useT } from '@/hooks/useTranslation';
+import { useUIStore } from '@/stores/uiStore';
 import InvoiceCard from '@/components/app/InvoiceCard';
-import AppHeader from '@/components/app/AppHeader';
 import Button from '@/components/ui/Button';
 import type { Invoice, InvoiceStatus } from '@/types';
 
@@ -42,16 +42,22 @@ const TABS: { key: FilterTab; labelKey: string }[] = [
   { key: 'overdue', labelKey: 'invoices.filters.overdue' },
 ];
 
+function Skeleton({ className }: { className?: string }) {
+  return <div className={`animate-pulse bg-gray-100 rounded ${className}`} />;
+}
+
 export default function InvoicesPage() {
   const { t } = useT();
   const { invoices, fetchInvoices } = useDataStore();
+  const openSidebar = useUIStore((s) => s.openSidebar);
   const [filter, setFilter] = useState<FilterTab>('all');
   const [search, setSearch] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetchInvoices();
+    fetchInvoices().finally(() => setLoading(false));
   }, [fetchInvoices]);
 
   useEffect(() => {
@@ -69,105 +75,143 @@ export default function InvoicesPage() {
     if (search) {
       const q = search.toLowerCase();
       const clientName = inv.client?.name || inv.client_name_override || '';
-      return (
-        clientName.toLowerCase().includes(q) ||
-        inv.number.toLowerCase().includes(q)
-      );
+      return clientName.toLowerCase().includes(q) || inv.number.toLowerCase().includes(q);
     }
     return true;
   });
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <AppHeader title={t('invoices.title')} />
+    <div className="flex flex-col min-h-screen bg-white">
+      {/* Page header */}
+      <div className="border-b border-gray-200 px-6 md:px-8 py-5">
+        <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={openSidebar}
+              className="md:hidden p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors"
+            >
+              <Menu size={18} />
+            </button>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-0.5">Documents</p>
+              <h1 className="text-xl font-black text-[#0D0D0D] tracking-tight leading-none">
+                {t('invoices.title')}
+              </h1>
+            </div>
+          </div>
 
-      <div className="flex-1 p-4 md:p-6 max-w-4xl mx-auto w-full space-y-4">
-        {/* Top bar */}
-        <div className="flex items-center gap-3">
-          <div className="flex-1 relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => exportToCSV(filtered)}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors border border-gray-200"
+            >
+              <Download size={13} />
+              Export CSV
+            </button>
+
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setDropdownOpen((o) => !o)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-[#0D0D0D] text-white hover:bg-[#1a1a1a] transition-colors"
+              >
+                <Plus size={14} />
+                <span className="hidden sm:inline">{t('invoices.new')}</span>
+                <ChevronDown size={12} />
+              </button>
+              {dropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-xl border border-gray-200 py-1.5 w-44 z-20">
+                  <Link
+                    href="/invoices/new?mode=voice"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <Mic size={14} className="text-primary-500" />
+                    {t('invoices.newVoice')}
+                  </Link>
+                  <Link
+                    href="/invoices/new?mode=manual"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <PenLine size={14} className="text-gray-400" />
+                    {t('invoices.newManual')}
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 max-w-5xl mx-auto w-full px-6 md:px-8 py-6 space-y-4">
+        {/* Search + filters */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               placeholder={t('invoices.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-400 bg-white"
+              className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-400 bg-white placeholder:text-gray-400"
             />
           </div>
-          {/* Export CSV */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => exportToCSV(filtered)}
-            className="gap-2 whitespace-nowrap"
-          >
-            <Download size={14} />
-            Export CSV
-          </Button>
-
-          {/* New document dropdown */}
-          <div className="relative" ref={dropdownRef}>
-            <Button
-              onClick={() => setDropdownOpen((o) => !o)}
-              className="gap-2 whitespace-nowrap"
-            >
-              <Plus size={16} />
-              {t('invoices.new')}
-              <ChevronDown size={14} />
-            </Button>
-            {dropdownOpen && (
-              <div className="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 w-44 z-20">
-                <Link
-                  href="/invoices/new?mode=voice"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  <Mic size={15} className="text-primary-500" />
-                  {t('invoices.newVoice')}
-                </Link>
-                <Link
-                  href="/invoices/new?mode=manual"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  <PenLine size={15} className="text-gray-500" />
-                  {t('invoices.newManual')}
-                </Link>
-              </div>
-            )}
+          {/* Filter tabs */}
+          <div className="flex gap-1 p-1 bg-gray-100 rounded-lg">
+            {TABS.map(({ key, labelKey }) => (
+              <button
+                key={key}
+                onClick={() => setFilter(key)}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
+                  filter === key
+                    ? 'bg-white shadow-sm text-[#0D0D0D]'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {t(labelKey as any)}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Filter tabs */}
-        <div className="flex gap-1 bg-gray-100 rounded-xl p-1 overflow-x-auto">
-          {TABS.map(({ key, labelKey }) => (
-            <button
-              key={key}
-              onClick={() => setFilter(key)}
-              className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
-                filter === key
-                  ? 'bg-white shadow text-gray-900'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+        {/* Table */}
+        {loading ? (
+          <div className="border border-gray-200 rounded-xl overflow-hidden">
+            <div className="grid grid-cols-[2fr_1fr_1fr_auto] gap-4 px-5 py-2.5 bg-gray-50 border-b border-gray-200">
+              {['Client', 'Date', 'Montant', 'Statut'].map((h) => (
+                <p key={h} className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">{h}</p>
+              ))}
+            </div>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="grid grid-cols-[2fr_1fr_1fr_auto] gap-4 items-center px-5 py-3.5 border-b border-gray-100 last:border-0">
+                <div><Skeleton className="h-2.5 w-16 mb-1.5" /><Skeleton className="h-3.5 w-36" /></div>
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-3.5 w-24" />
+                <Skeleton className="h-2.5 w-14" />
+              </div>
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="border border-dashed border-gray-200 rounded-xl py-16 text-center">
+            <Mic size={20} className="text-gray-300 mx-auto mb-3" />
+            <p className="text-sm font-semibold text-gray-500 mb-1">{t('invoices.empty')}</p>
+            <Link
+              href="/invoices/new?mode=voice"
+              className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary-600 hover:text-primary-700 transition-colors"
             >
-              {t(labelKey as any)}
-            </button>
-          ))}
-        </div>
-
-        {/* List */}
-        {filtered.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
-            <p className="text-gray-400 font-semibold">{t('invoices.empty')}</p>
-            <Link href="/invoices/new?mode=voice" className="mt-4 inline-block">
-              <Button size="sm" className="gap-2">
-                <Mic size={14} />
-                {t('invoices.newVoice')}
-              </Button>
+              <Mic size={13} />
+              {t('invoices.newVoice')}
             </Link>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="border border-gray-200 rounded-xl overflow-hidden">
+            {/* Header row */}
+            <div className="grid grid-cols-[1fr_auto] sm:grid-cols-[2fr_1fr_1fr_auto] gap-4 px-5 py-2.5 bg-gray-50 border-b border-gray-200">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Client</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 hidden sm:block">Date</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 text-right sm:text-left">Montant</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 hidden sm:block">Statut</p>
+            </div>
             {filtered.map((inv) => (
               <InvoiceCard key={inv.id} invoice={inv} />
             ))}

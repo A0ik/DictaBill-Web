@@ -6,9 +6,10 @@ import { useUIStore } from '@/stores/uiStore';
 
 interface AppHeaderProps {
   title: string;
+  subtitle?: string;
 }
 
-export default function AppHeader({ title }: AppHeaderProps) {
+export default function AppHeader({ title, subtitle }: AppHeaderProps) {
   const { i18n } = useT();
   const { user } = useAuthStore();
   const openSidebar = useUIStore((s) => s.openSidebar);
@@ -21,31 +22,36 @@ export default function AppHeader({ title }: AppHeaderProps) {
   const initials = user?.email?.charAt(0).toUpperCase() ?? '?';
 
   return (
-    <header className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100 md:px-6">
-      {/* Left: hamburger + title */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={openSidebar}
-          className="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
-          aria-label="Toggle menu"
-        >
-          <Menu size={20} />
-        </button>
-        <h1 className="text-lg font-black text-gray-900">{title}</h1>
-      </div>
+    <div className="border-b border-gray-200 bg-white px-6 md:px-8 py-5">
+      <div className="max-w-5xl mx-auto flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={openSidebar}
+            className="md:hidden p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors"
+            aria-label="Toggle menu"
+          >
+            <Menu size={18} />
+          </button>
+          <div>
+            {subtitle && (
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-0.5">{subtitle}</p>
+            )}
+            <h1 className="text-xl font-black text-[#0D0D0D] tracking-tight leading-none">{title}</h1>
+          </div>
+        </div>
 
-      {/* Right: lang toggle + avatar */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={toggleLang}
-          className="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-500 hover:bg-gray-100 transition-colors border border-gray-200 uppercase tracking-wide"
-        >
-          {i18n.language === 'fr' ? 'EN' : 'FR'}
-        </button>
-        <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
-          <span className="text-xs font-bold text-primary-700">{initials}</span>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={toggleLang}
+            className="px-2.5 py-1 rounded-md text-[11px] font-bold text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors uppercase tracking-widest border border-gray-200"
+          >
+            {i18n.language === 'fr' ? 'EN' : 'FR'}
+          </button>
+          <div className="w-7 h-7 rounded-full bg-[#0D0D0D] flex items-center justify-center">
+            <span className="text-[11px] font-bold text-white">{initials}</span>
+          </div>
         </div>
       </div>
-    </header>
+    </div>
   );
 }

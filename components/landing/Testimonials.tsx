@@ -1,69 +1,54 @@
 export default function Testimonials() {
   return (
-    <section className="py-28 bg-white">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-28 bg-white border-t border-gray-100">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Featured large quote */}
-        <div className="text-center mb-20">
-          <div
-            className="text-[120px] leading-none font-serif text-primary-100 select-none"
-            aria-hidden="true"
-          >
-            "
-          </div>
-          <blockquote className="-mt-10">
-            <p className="text-2xl font-medium text-[#0D0D0D] leading-relaxed max-w-2xl mx-auto">
-              J'ai créé ma première facture pendant que je raccrochais le téléphone avec mon client.
-              Mon comptable n'en revient pas.
-            </p>
-            <footer className="mt-8 flex items-center justify-center gap-3">
-              <div
-                className="w-8 h-8 rounded-full border-2 border-white shadow-sm"
-                style={{ backgroundColor: '#1D9E75' }}
-              />
-              <div className="text-left">
-                <p className="text-sm font-semibold text-[#0D0D0D]">Camille R.</p>
-                <p className="text-xs text-gray-400">Consultante SEO, Paris</p>
-              </div>
-            </footer>
-          </blockquote>
+        {/* Header */}
+        <div className="mb-16 max-w-sm">
+          <h2 className="text-4xl sm:text-5xl font-black text-[#0D0D0D] tracking-[-0.02em] leading-tight">
+            Ce qu&apos;ils en disent.
+          </h2>
         </div>
 
-        {/* Two smaller quotes */}
-        <div className="grid md:grid-cols-2 gap-6 mt-16">
-          <blockquote className="border border-gray-100 rounded-2xl p-6">
-            <p className="text-gray-600 text-sm leading-relaxed mb-6">
-              "Finies les nuits à faire de la paperasse. Je dicte, DictaBill génère, j'envoie.
-              Ça prend moins de temps que de trouver le bon template Word."
+        {/* Featured quote — dark card */}
+        <div className="grid lg:grid-cols-[3fr_2fr] gap-6 mb-6">
+          <div className="bg-[#0D0D0D] rounded-3xl p-10 flex flex-col justify-between min-h-[280px]">
+            <p className="text-xl sm:text-2xl font-medium text-white leading-snug mb-10">
+              &ldquo;Je facturais en fin de journée, souvent le soir tard. Maintenant je le fais dans le taxi en rentrant du client. Le truc c&apos;est que j&apos;oublie plus jamais de facturer.&rdquo;
             </p>
-            <footer className="flex items-center gap-3">
-              <div
-                className="w-7 h-7 rounded-full shrink-0"
-                style={{ backgroundColor: '#2563EB' }}
-              />
+            <div>
+              <p className="text-sm font-semibold text-white">Camille R.</p>
+              <p className="text-xs text-gray-500 mt-0.5">Consultante SEO, Paris · indépendante depuis 4 ans</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-6">
+            <div className="border border-gray-200 rounded-3xl p-8 flex flex-col justify-between flex-1">
+              <p className="text-base font-medium text-[#0D0D0D] leading-snug mb-6">
+                &ldquo;J&apos;ai testé par curiosité. Ma première facture : 28 secondes chrono. C&apos;est la seule façon que j&apos;utilise maintenant.&rdquo;
+              </p>
               <div>
                 <p className="text-sm font-semibold text-[#0D0D0D]">Mehdi L.</p>
-                <p className="text-xs text-gray-400">Développeur freelance</p>
+                <p className="text-xs text-gray-400 mt-0.5">Développeur freelance, Lyon</p>
               </div>
-            </footer>
-          </blockquote>
+            </div>
 
-          <blockquote className="border border-gray-100 rounded-2xl p-6">
-            <p className="text-gray-600 text-sm leading-relaxed mb-6">
-              "J'avais peur que ce soit un gadget. Après 3 mois, c'est l'outil que j'ouvre en premier."
-            </p>
-            <footer className="flex items-center gap-3">
-              <div
-                className="w-7 h-7 rounded-full shrink-0"
-                style={{ backgroundColor: '#8B5CF6' }}
-              />
+            <div className="bg-primary-50 rounded-3xl p-8 flex flex-col justify-between flex-1">
+              <p className="text-base font-medium text-[#0D0D0D] leading-snug mb-6">
+                &ldquo;Mes devis partent le jour même. Avant j&apos;attendais d&apos;avoir du temps pour &lsquo;bien faire&rsquo; — du coup je les envoyais jamais.&rdquo;
+              </p>
               <div>
                 <p className="text-sm font-semibold text-[#0D0D0D]">Lucie V.</p>
-                <p className="text-xs text-gray-400">Designer UX, Lyon</p>
+                <p className="text-xs text-gray-400 mt-0.5">Designer UX, remote</p>
               </div>
-            </footer>
-          </blockquote>
+            </div>
+          </div>
         </div>
+
+        {/* Bottom line */}
+        <p className="text-center text-sm text-gray-400 pt-4">
+          1 247 freelances utilisent DictaBill chaque semaine.
+        </p>
       </div>
     </section>
   );

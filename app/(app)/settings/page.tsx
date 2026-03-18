@@ -1,7 +1,8 @@
 'use client';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Upload, Loader2, Lock, ExternalLink, LogOut, AlertTriangle, Check } from 'lucide-react';
+import { Upload, Loader2, Lock, ExternalLink, LogOut, AlertTriangle, Check, ImagePlus, Trash2 } from 'lucide-react';
+import { useImageUpload } from '@/components/hooks/use-image-upload';
 import { useAuthStore } from '@/stores/authStore';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useT } from '@/hooks/useTranslation';
@@ -30,7 +31,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { previewUrl, fileInputRef, handleThumbnailClick, handleFileChange: hookFileChange, handleRemove } = useImageUpload();
 
   const [form, setForm] = useState({
     company_name: '',
@@ -106,6 +107,7 @@ export default function SettingsPage() {
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    hookFileChange(e); // show local preview immediately
     setLogoUploading(true);
     try {
       const ext = file.name.split('.').pop();
@@ -159,36 +161,47 @@ export default function SettingsPage() {
           {/* Logo */}
           <div>
             <p className="text-xs font-semibold text-gray-600 mb-2">{t('settings.logo')}</p>
-            <div className="flex items-center gap-4">
-              {form.logo_url ? (
-                <img src={form.logo_url} alt="Logo" className="h-16 w-auto rounded-xl border border-gray-100 object-contain" />
-              ) : (
-                <div className="h-16 w-24 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center">
-                  <span className="text-xs text-gray-400">Logo</span>
-                </div>
-              )}
-              <div className="space-y-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  loading={logoUploading}
-                  onClick={() => fileInputRef.current?.click()}
-                  className="gap-2"
-                >
-                  <Upload size={14} />
-                  {form.logo_url ? t('settings.changeLogo') : t('settings.uploadLogo')}
-                </Button>
-                {form.logo_url && (
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+            {previewUrl || form.logo_url ? (
+              <div className="relative w-40 h-24 group">
+                <img
+                  src={previewUrl || form.logo_url}
+                  alt="Logo"
+                  className="w-full h-full rounded-xl border border-gray-200 object-contain bg-gray-50 transition-transform duration-300 group-hover:scale-[1.02]"
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center gap-2">
                   <button
-                    onClick={() => setForm((prev) => ({ ...prev, logo_url: '' }))}
-                    className="block text-xs text-red-500 hover:underline"
+                    onClick={handleThumbnailClick}
+                    className="p-1.5 bg-white/90 rounded-lg hover:bg-white transition-colors"
+                    title="Changer"
                   >
-                    {t('settings.removeLogo')}
+                    {logoUploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
                   </button>
-                )}
+                  <button
+                    onClick={() => { handleRemove(); setForm((prev) => ({ ...prev, logo_url: '' })); }}
+                    className="p-1.5 bg-white/90 rounded-lg hover:bg-red-50 text-red-500 transition-colors"
+                    title="Supprimer"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </div>
-              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
-            </div>
+            ) : (
+              <button
+                onClick={handleThumbnailClick}
+                disabled={logoUploading}
+                className="w-40 h-24 rounded-xl border-2 border-dashed border-gray-200 hover:border-gray-300 bg-gray-50 hover:bg-gray-100 transition-colors flex flex-col items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {logoUploading ? (
+                  <Loader2 size={18} className="text-gray-400 animate-spin" />
+                ) : (
+                  <ImagePlus size={18} className="text-gray-400" />
+                )}
+                <span className="text-xs text-gray-400 font-medium">
+                  {logoUploading ? 'Upload…' : t('settings.uploadLogo')}
+                </span>
+              </button>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

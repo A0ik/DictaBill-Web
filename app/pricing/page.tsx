@@ -1,6 +1,6 @@
 import I18nProvider from '@/components/I18nProvider';
 import Navbar from '@/components/landing/Navbar';
-import PricingSection from '@/components/landing/PricingSection';
+import PricingAnimated from '@/components/landing/PricingAnimated';
 import CtaBanner from '@/components/landing/CtaBanner';
 import Footer from '@/components/landing/Footer';
 
@@ -53,7 +53,7 @@ export default function PricingPage() {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-1 pt-16">
-          <PricingSection />
+          <PricingAnimated />
           <FaqSection />
           <CtaBanner />
         </main>

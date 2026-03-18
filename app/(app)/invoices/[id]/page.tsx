@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  Download, Send, CheckCircle, Copy, Trash2, Pencil, Save, X, ArrowLeft, Mail, Loader2
+  Download, Send, CheckCircle, Copy, Trash2, Pencil, Save, X, ArrowLeft, Mail, Loader2, Sparkles
 } from 'lucide-react';
 import { useDataStore } from '@/stores/dataStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -30,6 +30,10 @@ export default function InvoiceDetailPage() {
   const [sendEmail, setSendEmail] = useState('');
   const [sending, setSending] = useState(false);
   const [generatingPDF, setGeneratingPDF] = useState(false);
+  const [aiModal, setAiModal] = useState(false);
+  const [aiStyle, setAiStyle] = useState('');
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiHtml, setAiHtml] = useState<string | null>(null);
 
   const [notes, setNotes] = useState('');
   const [dueDate, setDueDate] = useState('');
@@ -120,6 +124,51 @@ export default function InvoiceDetailPage() {
       router.push('/invoices');
     } catch (err: any) {
       toast.error(err.message);
+    }
+  };
+
+  const handleGenerateAiPDF = async () => {
+    if (!invoice || !profile) return;
+    setAiGenerating(true);
+    try {
+      const res = await fetch('/api/generate-invoice-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invoice, profile, style: aiStyle || 'moderne et professionnel' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setAiHtml(data.html);
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
+  const handleDownloadAiPDF = async () => {
+    if (!aiHtml || !invoice) return;
+    setGeneratingPDF(true);
+    try {
+      const container = document.createElement('div');
+      container.innerHTML = aiHtml;
+      container.style.cssText = 'position:fixed;top:0;left:0;width:794px;background:white;z-index:-9999;visibility:hidden;';
+      document.body.appendChild(container);
+      const html2canvas = (await import('html2canvas')).default;
+      const jsPDF = (await import('jspdf')).default;
+      const canvas = await html2canvas(container, { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false });
+      document.body.removeChild(container);
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const imgData = canvas.toDataURL('image/png');
+      const pageWidth = 210;
+      const imgHeight = (canvas.height * pageWidth) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, Math.min(imgHeight, 297));
+      pdf.save(`${invoice.number}-custom.pdf`);
+      setAiModal(false);
+    } catch (err: any) {
+      toast.error('Erreur génération PDF');
+    } finally {
+      setGeneratingPDF(false);
     }
   };
 
@@ -240,6 +289,10 @@ export default function InvoiceDetailPage() {
                 <Button variant="outline" size="sm" onClick={handleDownloadPDF} loading={generatingPDF} className="gap-1.5">
                   {generatingPDF ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
                   Télécharger PDF
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => { setAiModal(true); setAiHtml(null); }} className="gap-1.5">
+                  <Sparkles size={14} className="text-primary-500" />
+                  PDF personnalisé IA
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="gap-1.5">
                   <Pencil size={14} /> {t('invoices.editBtn')}
@@ -413,6 +466,57 @@ export default function InvoiceDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* AI PDF modal */}
+      <Modal open={aiModal} onClose={() => setAiModal(false)} title="Générer un PDF personnalisé par IA">
+        <div className="px-6 py-5 space-y-4">
+          {!aiHtml ? (
+            <>
+              <p className="text-sm text-gray-500">
+                Décrivez le style souhaité pour votre facture. L&apos;IA génère un template HTML unique basé sur votre description.
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {['Moderne minimaliste', 'Sombre et premium', 'Coloré et créatif', 'Classique professionnel'].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setAiStyle(s)}
+                    className={`px-3 py-2 rounded-lg text-xs font-semibold border-2 transition-all text-left ${
+                      aiStyle === s ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+              <input
+                className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300 placeholder:text-gray-400"
+                placeholder="ou décrivez librement… ex: fond noir, accent violet, typographie moderne"
+                value={aiStyle}
+                onChange={(e) => setAiStyle(e.target.value)}
+              />
+              <Button onClick={handleGenerateAiPDF} loading={aiGenerating} fullWidth className="gap-2">
+                <Sparkles size={15} />
+                {aiGenerating ? 'Génération en cours…' : 'Générer le template'}
+              </Button>
+            </>
+          ) : (
+            <>
+              <div
+                className="border border-gray-200 rounded-xl overflow-auto max-h-96 bg-white p-4 text-xs"
+                dangerouslySetInnerHTML={{ __html: aiHtml }}
+              />
+              <div className="flex gap-3">
+                <Button onClick={handleDownloadAiPDF} loading={generatingPDF} fullWidth className="gap-2">
+                  <Download size={14} /> Télécharger ce PDF
+                </Button>
+                <Button variant="ghost" onClick={() => setAiHtml(null)} className="gap-1.5">
+                  <Sparkles size={14} /> Régénérer
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      </Modal>
 
       {/* Send email modal */}
       <Modal open={sendModal} onClose={() => setSendModal(false)} title="Envoyer la facture par email">

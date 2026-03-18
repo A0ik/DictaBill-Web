@@ -34,6 +34,37 @@
   }
 }
 
+/* Floating animations for hero badges */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes floatDelay {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes bounceSoft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-float-delay { animation: floatDelay 3.5s ease-in-out infinite 0.5s; }
+.animate-bounce-soft { animation: bounceSoft 2s ease-in-out infinite; }
+
+/* Print styles — only show invoice when printing */
+@media print {
+  body * { visibility: hidden; }
+  #invoice-printable, #invoice-printable * { visibility: visible; }
+  #invoice-printable {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 2rem;
+  }
+  .no-print { display: none !important; }
+}
+
 /* Waveform animation */
 @keyframes waveBar {
   0%, 100% { transform: scaleY(0.3); }

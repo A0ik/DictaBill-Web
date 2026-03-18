@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  Download, Send, CheckCircle, Copy, Trash2, Pencil, Save, X, ArrowLeft
+  Printer, Send, CheckCircle, Copy, Trash2, Pencil, Save, X, ArrowLeft
 } from 'lucide-react';
 import { useDataStore } from '@/stores/dataStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -26,7 +26,6 @@ export default function InvoiceDetailPage() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Editable fields
   const [notes, setNotes] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [editItems, setEditItems] = useState<InvoiceItem[]>([]);
@@ -135,7 +134,7 @@ export default function InvoiceDetailPage() {
       <div className="flex flex-col min-h-screen">
         <AppHeader title="Document" />
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-gray-400">Chargement…</p>
+          <div className="animate-spin w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full" />
         </div>
       </div>
     );
@@ -146,195 +145,204 @@ export default function InvoiceDetailPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <AppHeader title={invoice.number} />
+      <div className="no-print">
+        <AppHeader title={invoice.number} />
+      </div>
 
-      <div className="flex-1 p-4 md:p-6 max-w-3xl mx-auto w-full space-y-5">
-        {/* Back + status */}
-        <div className="flex items-center justify-between">
+      <div className="flex-1 p-4 md:p-6 max-w-4xl mx-auto w-full space-y-5">
+        {/* Back + status + actions */}
+        <div className="no-print flex items-center justify-between gap-3 flex-wrap">
           <Link href="/invoices" className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-800">
             <ArrowLeft size={16} /> {t('common.back')}
           </Link>
-          <span className={`text-xs font-bold px-3 py-1 rounded-full ${getStatusColor(invoice.status)}`}>
-            {getStatusLabel(invoice.status, lang)}
-          </span>
-        </div>
-
-        {/* Header card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
-                {getDocumentLabel(invoice.document_type, lang)}
-              </p>
-              <h2 className="text-2xl font-black text-gray-900">{invoice.number}</h2>
-              <p className="text-gray-500 mt-1 font-semibold">{clientName}</p>
-              {invoice.client?.email && (
-                <p className="text-sm text-gray-400">{invoice.client.email}</p>
-              )}
-            </div>
-            <div className="text-right">
-              <p className="text-3xl font-black text-gray-900">{formatCurrency(invoice.total, locale)}</p>
-              <p className="text-sm text-gray-400 mt-1">
-                {t('invoices.issueDate')}: {formatDate(invoice.issue_date, locale)}
-              </p>
-              {invoice.due_date && !editing && (
-                <p className="text-sm text-gray-400">
-                  {t('invoices.dueDate')}: {formatDate(invoice.due_date, locale)}
-                </p>
-              )}
-              {editing && (
-                <div className="mt-2">
-                  <Input
-                    label={t('invoices.dueDate')}
-                    type="date"
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Items table */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <p className="text-sm font-bold text-gray-700 mb-4">{t('invoices.items')}</p>
-          <div className="space-y-3">
-            {displayItems.map((item, idx) => (
-              <div key={idx} className={editing ? 'grid grid-cols-12 gap-2 items-end' : 'flex items-center justify-between py-2 border-b border-gray-50 last:border-0'}>
-                {editing ? (
-                  <>
-                    <div className="col-span-5">
-                      <Input
-                        label={idx === 0 ? 'Description' : ''}
-                        value={item.description}
-                        onChange={(e) => updateEditItem(idx, 'description', e.target.value)}
-                      />
-                    </div>
-                    <div className="col-span-2">
-                      <Input
-                        label={idx === 0 ? 'Qté' : ''}
-                        type="number"
-                        value={item.quantity}
-                        onChange={(e) => updateEditItem(idx, 'quantity', Number(e.target.value))}
-                      />
-                    </div>
-                    <div className="col-span-2">
-                      <Input
-                        label={idx === 0 ? 'Prix HT' : ''}
-                        type="number"
-                        value={item.unit_price}
-                        onChange={(e) => updateEditItem(idx, 'unit_price', Number(e.target.value))}
-                      />
-                    </div>
-                    <div className="col-span-2">
-                      <Input
-                        label={idx === 0 ? 'TVA %' : ''}
-                        type="number"
-                        value={item.vat_rate}
-                        onChange={(e) => updateEditItem(idx, 'vat_rate', Number(e.target.value))}
-                      />
-                    </div>
-                    <div className="col-span-1" />
-                  </>
-                ) : (
-                  <>
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-gray-800">{item.description}</p>
-                      <p className="text-xs text-gray-400">{item.quantity} × {formatCurrency(item.unit_price, locale)} · TVA {item.vat_rate}%</p>
-                    </div>
-                    <span className="font-bold text-gray-900">{formatCurrency(item.total, locale)}</span>
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Totals */}
-          <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
-            <div className="flex justify-between text-sm text-gray-500">
-              <span>{t('invoices.subtotal')}</span>
-              <span>{formatCurrency(invoice.subtotal, locale)}</span>
-            </div>
-            <div className="flex justify-between text-sm text-gray-500">
-              <span>{t('invoices.vat')}</span>
-              <span>{formatCurrency(invoice.vat_amount, locale)}</span>
-            </div>
-            <div className="flex justify-between text-base font-black text-gray-900 pt-2 border-t border-gray-100">
-              <span>{t('invoices.total')}</span>
-              <span>{formatCurrency(invoice.total, locale)}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Notes */}
-        {(invoice.notes || editing) && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-            <p className="text-sm font-bold text-gray-700 mb-2">{t('invoices.notes')}</p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={`text-xs font-bold px-3 py-1 rounded-full ${getStatusColor(invoice.status)}`}>
+              {getStatusLabel(invoice.status, lang)}
+            </span>
             {editing ? (
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={3}
-                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300 resize-none"
-              />
+              <>
+                <Button onClick={handleSave} loading={saving} size="sm" className="gap-1.5">
+                  <Save size={14} /> {t('common.save')}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setEditing(false)} className="gap-1.5">
+                  <X size={14} /> {t('common.cancel')}
+                </Button>
+              </>
             ) : (
-              <p className="text-sm text-gray-600 whitespace-pre-line">{invoice.notes}</p>
+              <>
+                <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5">
+                  <Printer size={14} /> PDF / Imprimer
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="gap-1.5">
+                  <Pencil size={14} /> {t('invoices.editBtn')}
+                </Button>
+                {invoice.status === 'draft' && (
+                  <Button size="sm" variant="secondary" onClick={handleMarkSent} className="gap-1.5">
+                    <Send size={14} /> {t('invoices.sendBtn')}
+                  </Button>
+                )}
+                {invoice.status !== 'paid' && (
+                  <Button size="sm" onClick={handleMarkPaid} className="gap-1.5">
+                    <CheckCircle size={14} /> {t('invoices.markPaid')}
+                  </Button>
+                )}
+                <Button variant="secondary" size="sm" onClick={handleDuplicate} className="gap-1.5">
+                  <Copy size={14} /> {t('invoices.duplicateBtn')}
+                </Button>
+                <Button variant="danger" size="sm" onClick={handleDelete} className="gap-1.5">
+                  <Trash2 size={14} />
+                </Button>
+              </>
             )}
           </div>
-        )}
+        </div>
 
-        {/* Actions */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-          {editing ? (
-            <div className="flex gap-3">
-              <Button onClick={handleSave} loading={saving} className="gap-2">
-                <Save size={15} /> {t('common.save')}
-              </Button>
-              <Button variant="ghost" onClick={() => setEditing(false)} className="gap-2">
-                <X size={15} /> {t('common.cancel')}
-              </Button>
+        {/* ── Printable invoice document ── */}
+        <div id="invoice-printable" className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          {/* Invoice header */}
+          <div className="p-8 md:p-10">
+            <div className="flex items-start justify-between gap-6 flex-wrap mb-10">
+              {/* Sender info */}
+              <div>
+                {profile?.logo_url && (
+                  <img src={profile.logo_url} alt="Logo" className="h-10 mb-4 object-contain" />
+                )}
+                <h2 className="text-xl font-black text-gray-900">{profile?.company_name || 'Mon Entreprise'}</h2>
+                {profile?.address && <p className="text-sm text-gray-500 mt-0.5">{profile.address}</p>}
+                {profile?.city && <p className="text-sm text-gray-500">{profile?.postal_code} {profile.city}</p>}
+                {profile?.siret && <p className="text-xs text-gray-400 mt-2">SIRET : {profile.siret}</p>}
+                {profile?.vat_number && <p className="text-xs text-gray-400">TVA : {profile.vat_number}</p>}
+              </div>
+
+              {/* Document badge + number */}
+              <div className="text-right">
+                <div className="inline-block bg-primary-500 text-white px-5 py-2 rounded-xl mb-3">
+                  <p className="font-bold text-sm">{getDocumentLabel(invoice.document_type, lang)}</p>
+                </div>
+                <p className="text-2xl font-black text-gray-900">{invoice.number}</p>
+                <p className="text-sm text-gray-400 mt-1">{t('invoices.issueDate')} : {formatDate(invoice.issue_date, locale)}</p>
+                {invoice.due_date && !editing && (
+                  <p className="text-sm text-gray-400">{t('invoices.dueDate')} : {formatDate(invoice.due_date, locale)}</p>
+                )}
+                {editing && (
+                  <div className="mt-2 text-left">
+                    <Input label={t('invoices.dueDate')} type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+                  </div>
+                )}
+              </div>
             </div>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setEditing(true)}
-                className="gap-2"
-              >
-                <Pencil size={14} /> {t('invoices.editBtn')}
-              </Button>
 
-              {invoice.pdf_url && (
-                <a href={invoice.pdf_url} target="_blank" rel="noopener noreferrer">
-                  <Button variant="secondary" size="sm" className="gap-2">
-                    <Download size={14} /> {t('invoices.downloadBtn')}
-                  </Button>
-                </a>
-              )}
-
-              {invoice.status === 'draft' && (
-                <Button size="sm" variant="secondary" onClick={handleMarkSent} className="gap-2">
-                  <Send size={14} /> {t('invoices.sendBtn')}
-                </Button>
-              )}
-
-              {invoice.status !== 'paid' && (
-                <Button size="sm" onClick={handleMarkPaid} className="gap-2">
-                  <CheckCircle size={14} /> {t('invoices.markPaid')}
-                </Button>
-              )}
-
-              <Button variant="secondary" size="sm" onClick={handleDuplicate} className="gap-2">
-                <Copy size={14} /> {t('invoices.duplicateBtn')}
-              </Button>
-
-              <Button variant="danger" size="sm" onClick={handleDelete} className="gap-2">
-                <Trash2 size={14} /> {t('common.delete')}
-              </Button>
+            {/* Client block */}
+            <div className="bg-gray-50 rounded-xl p-5 mb-8">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Destinataire</p>
+              <p className="font-bold text-gray-900 text-base">{clientName}</p>
+              {invoice.client?.address && <p className="text-sm text-gray-600">{invoice.client.address}</p>}
+              {invoice.client?.city && <p className="text-sm text-gray-600">{invoice.client?.postal_code} {invoice.client.city}</p>}
+              {invoice.client?.email && <p className="text-sm text-gray-500 mt-1">{invoice.client.email}</p>}
+              {invoice.client?.siret && <p className="text-xs text-gray-400 mt-1">SIRET : {invoice.client.siret}</p>}
             </div>
-          )}
+
+            {/* Items table */}
+            <div className="mb-8">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-900 text-white">
+                    <th className="text-left py-3 px-4 text-xs font-bold rounded-l-xl">Description</th>
+                    <th className="text-center py-3 px-4 text-xs font-bold">Qté</th>
+                    <th className="text-right py-3 px-4 text-xs font-bold">Prix HT</th>
+                    <th className="text-right py-3 px-4 text-xs font-bold">TVA</th>
+                    <th className="text-right py-3 px-4 text-xs font-bold rounded-r-xl">Total HT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayItems.map((item, idx) => (
+                    <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
+                      <td className="py-3 px-4">
+                        {editing ? (
+                          <input
+                            value={item.description}
+                            onChange={(e) => updateEditItem(idx, 'description', e.target.value)}
+                            className="w-full text-sm border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary-400"
+                          />
+                        ) : (
+                          <span className="text-sm text-gray-800">{item.description}</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        {editing ? (
+                          <input type="number" value={item.quantity} onChange={(e) => updateEditItem(idx, 'quantity', Number(e.target.value))}
+                            className="w-16 text-sm border border-gray-200 rounded-lg px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-primary-400" />
+                        ) : (
+                          <span className="text-sm text-gray-600">{item.quantity}</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {editing ? (
+                          <input type="number" value={item.unit_price} onChange={(e) => updateEditItem(idx, 'unit_price', Number(e.target.value))}
+                            className="w-24 text-sm border border-gray-200 rounded-lg px-2 py-1 text-right focus:outline-none focus:ring-1 focus:ring-primary-400" />
+                        ) : (
+                          <span className="text-sm text-gray-600">{formatCurrency(item.unit_price, locale)}</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {editing ? (
+                          <input type="number" value={item.vat_rate} onChange={(e) => updateEditItem(idx, 'vat_rate', Number(e.target.value))}
+                            className="w-16 text-sm border border-gray-200 rounded-lg px-2 py-1 text-right focus:outline-none focus:ring-1 focus:ring-primary-400" />
+                        ) : (
+                          <span className="text-sm text-gray-600">{item.vat_rate}%</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <span className="text-sm font-semibold text-gray-900">{formatCurrency(item.quantity * item.unit_price, locale)}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Totals */}
+            <div className="flex justify-end mb-8">
+              <div className="w-64 space-y-2">
+                <div className="flex justify-between text-sm text-gray-500">
+                  <span>{t('invoices.subtotal')}</span>
+                  <span className="font-semibold text-gray-800">{formatCurrency(invoice.subtotal, locale)}</span>
+                </div>
+                <div className="flex justify-between text-sm text-gray-500">
+                  <span>{t('invoices.vat')}</span>
+                  <span className="font-semibold text-gray-800">{formatCurrency(invoice.vat_amount, locale)}</span>
+                </div>
+                <div className="flex justify-between text-base font-black text-gray-900 pt-3 border-t-2 border-gray-900">
+                  <span>{t('invoices.total')}</span>
+                  <span>{formatCurrency(invoice.total, locale)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Notes */}
+            {(invoice.notes || editing) && (
+              <div className="border-t border-gray-100 pt-6">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">{t('invoices.notes')}</p>
+                {editing ? (
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    rows={3}
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300 resize-none"
+                  />
+                ) : (
+                  <p className="text-sm text-gray-600 whitespace-pre-line">{invoice.notes}</p>
+                )}
+              </div>
+            )}
+
+            {/* Legal footer */}
+            <div className="border-t border-gray-100 pt-6 mt-6 text-xs text-gray-400 text-center">
+              {profile?.siret && <span>SIRET {profile.siret} · </span>}
+              {profile?.vat_number && <span>TVA {profile.vat_number} · </span>}
+              <span>Document généré par DictaBill</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

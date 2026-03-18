@@ -35,7 +35,7 @@ export default function Footer() {
         </div>
         <div className="border-t border-gray-800 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
           <p className="text-xs">{t('footer.copyright')}</p>
-          <p className="text-xs">Made with ❤️ for freelancers</p>
+          <p className="text-xs">Fait pour les indépendants.</p>
         </div>
       </div>
     </footer>

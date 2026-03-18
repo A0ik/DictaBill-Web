@@ -76,7 +76,8 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { user, initialized, initialize } = useAuthStore();
+  const pathname = usePathname();
+  const { user, profile, initialized, initialize } = useAuthStore();
   const { sidebarOpen, closeSidebar } = useUIStore();
 
   useEffect(() => {
@@ -84,10 +85,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }, [initialize]);
 
   useEffect(() => {
-    if (initialized && !user) {
+    if (!initialized) return;
+    if (!user) {
       router.push('/login');
+      return;
     }
-  }, [initialized, user, router]);
+    // Redirect to onboarding if not done yet, except when already on /onboarding
+    if (profile && profile.onboarding_done === false && pathname !== '/onboarding') {
+      router.push('/onboarding');
+    }
+  }, [initialized, user, profile, router, pathname]);
 
   if (!initialized) {
     return (

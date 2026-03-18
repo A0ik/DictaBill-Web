@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  Printer, Send, CheckCircle, Copy, Trash2, Pencil, Save, X, ArrowLeft
+  Printer, Send, CheckCircle, Copy, Trash2, Pencil, Save, X, ArrowLeft, Mail
 } from 'lucide-react';
 import { useDataStore } from '@/stores/dataStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -11,6 +11,7 @@ import { formatCurrency, formatDate, getStatusColor, getStatusLabel, getDocument
 import AppHeader from '@/components/app/AppHeader';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import Modal from '@/components/ui/Modal';
 import toast from 'react-hot-toast';
 import type { Invoice, InvoiceItem } from '@/types';
 import Link from 'next/link';
@@ -25,6 +26,9 @@ export default function InvoiceDetailPage() {
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [sendModal, setSendModal] = useState(false);
+  const [sendEmail, setSendEmail] = useState('');
+  const [sending, setSending] = useState(false);
 
   const [notes, setNotes] = useState('');
   const [dueDate, setDueDate] = useState('');
@@ -76,11 +80,34 @@ export default function InvoiceDetailPage() {
 
   const handleMarkSent = async () => {
     if (!invoice) return;
+    // Pre-fill email from client if available
+    setSendEmail(invoice.client?.email || '');
+    setSendModal(true);
+  };
+
+  const handleSendEmail = async () => {
+    if (!invoice || !profile) return;
+    const email = sendEmail.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error('Adresse email invalide');
+      return;
+    }
+    setSending(true);
     try {
+      const res = await fetch('/api/send-invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invoice, profile, recipientEmail: email }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur envoi');
       await updateInvoiceStatus(invoice.id, 'sent');
-      toast.success(t('invoices.sendBtn'));
+      toast.success('Facture envoyée !');
+      setSendModal(false);
     } catch (err: any) {
       toast.error(err.message);
+    } finally {
+      setSending(false);
     }
   };
 
@@ -178,7 +205,7 @@ export default function InvoiceDetailPage() {
                 </Button>
                 {invoice.status === 'draft' && (
                   <Button size="sm" variant="secondary" onClick={handleMarkSent} className="gap-1.5">
-                    <Send size={14} /> {t('invoices.sendBtn')}
+                    <Mail size={14} /> Envoyer par email
                   </Button>
                 )}
                 {invoice.status !== 'paid' && (
@@ -345,6 +372,28 @@ export default function InvoiceDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Send email modal */}
+      <Modal open={sendModal} onClose={() => setSendModal(false)} title="Envoyer la facture par email">
+        <div className="px-6 py-5 space-y-4">
+          <p className="text-sm text-gray-600">
+            La facture <span className="font-semibold">{invoice?.number}</span> sera envoyée par email au destinataire ci-dessous.
+          </p>
+          <Input
+            label="Adresse email du destinataire"
+            type="email"
+            value={sendEmail}
+            onChange={(e) => setSendEmail(e.target.value)}
+            placeholder="client@exemple.fr"
+          />
+          <div className="flex gap-3">
+            <Button loading={sending} onClick={handleSendEmail} fullWidth className="gap-2">
+              <Send size={15} /> Envoyer
+            </Button>
+            <Button variant="ghost" fullWidth onClick={() => setSendModal(false)}>Annuler</Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

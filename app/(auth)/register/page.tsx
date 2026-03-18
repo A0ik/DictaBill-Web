@@ -40,7 +40,7 @@ export default function RegisterPage() {
       });
       if (error) throw error;
       toast.success(t('auth.registerBtn'));
-      router.push('/dashboard');
+      router.push('/onboarding');
     } catch (err: any) {
       toast.error(err.message);
     } finally {

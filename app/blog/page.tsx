@@ -10,6 +10,30 @@ export const metadata: Metadata = {
 
 const ARTICLES = [
   {
+    slug: 'erreurs-facturation-freelance',
+    title: '5 erreurs de facturation qui coûtent cher aux freelances',
+    excerpt: 'TVA mal calculée, mentions manquantes, numérotation incorrecte... Ces erreurs courantes peuvent vous coûter cher. Apprenez à les éviter.',
+    date: '1 avril 2025',
+    readTime: '6 min',
+    tag: 'Conseils',
+  },
+  {
+    slug: 'relancer-client-impaye',
+    title: 'Comment relancer un client qui ne paie pas',
+    excerpt: 'Procédure complète pour récupérer votre argent : email amiable, mise en demeure, injonction de payer. Modèles de mails inclus.',
+    date: '25 mars 2025',
+    readTime: '7 min',
+    tag: 'Gestion',
+  },
+  {
+    slug: 'devis-vs-facture',
+    title: 'Devis vs Facture : quelle différence ?',
+    excerpt: 'Valeur légale, mentions obligatoires, conversion devis → facture — tout ce que vous devez savoir sur ces deux documents essentiels.',
+    date: '20 mars 2025',
+    readTime: '5 min',
+    tag: 'Facturation',
+  },
+  {
     slug: 'facturation-freelance-2025',
     title: 'Comment facturer en 2025 quand on est freelance',
     excerpt: 'Mentions obligatoires, TVA, délais de paiement, outils — tout ce que vous devez savoir pour facturer correctement et rapidement en 2025.',

@@ -1,13 +1,36 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import { Search, Plus, Mic, PenLine, ChevronDown } from 'lucide-react';
+import { Search, Plus, Mic, PenLine, ChevronDown, Download } from 'lucide-react';
 import { useDataStore } from '@/stores/dataStore';
 import { useT } from '@/hooks/useTranslation';
 import InvoiceCard from '@/components/app/InvoiceCard';
 import AppHeader from '@/components/app/AppHeader';
 import Button from '@/components/ui/Button';
-import type { InvoiceStatus } from '@/types';
+import type { Invoice, InvoiceStatus } from '@/types';
+
+function exportToCSV(invoices: Invoice[]) {
+  const headers = ['Numéro', 'Type', 'Client', 'Date émission', 'Échéance', 'HT', 'TVA', 'TTC', 'Statut'];
+  const rows = invoices.map((inv) => [
+    inv.number,
+    inv.document_type,
+    inv.client?.name || inv.client_name_override || '',
+    inv.issue_date,
+    inv.due_date || '',
+    inv.subtotal.toFixed(2),
+    inv.vat_amount.toFixed(2),
+    inv.total.toFixed(2),
+    inv.status,
+  ]);
+  const csv = [headers, ...rows].map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `dictabill-export-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 type FilterTab = 'all' | 'draft' | 'sent' | 'paid' | 'overdue';
 
@@ -71,6 +94,17 @@ export default function InvoicesPage() {
               className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-400 bg-white"
             />
           </div>
+          {/* Export CSV */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => exportToCSV(filtered)}
+            className="gap-2 whitespace-nowrap"
+          >
+            <Download size={14} />
+            Export CSV
+          </Button>
+
           {/* New document dropdown */}
           <div className="relative" ref={dropdownRef}>
             <Button

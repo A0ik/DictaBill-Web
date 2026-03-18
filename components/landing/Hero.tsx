@@ -1,8 +1,9 @@
 'use client';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { useT } from '@/hooks/useTranslation';
-import { Mic, ArrowRight, Play, CheckCircle2, CreditCard, TrendingUp } from 'lucide-react';
+import { Mic, ArrowRight, Play, CheckCircle2, CreditCard } from 'lucide-react';
 import DemoModal from '@/components/landing/DemoModal';
 
 export default function Hero() {
@@ -97,75 +98,20 @@ export default function Hero() {
               <div className="absolute -right-[3px] top-36 w-[3px] h-14 bg-gray-700 rounded-r-md" />
 
               {/* Screen */}
-              <div className="bg-gray-50 rounded-[3rem] overflow-hidden" style={{ height: 580 }}>
-                {/* Status bar + notch */}
-                <div className="bg-gray-900 h-8 flex items-center justify-center relative">
-                  <div className="w-24 h-5 bg-gray-900 rounded-full absolute top-1" style={{ zIndex: 1 }} />
+              <div className="rounded-[3rem] overflow-hidden relative" style={{ height: 580, background: 'linear-gradient(160deg, #1D9E75 0%, #0f7a5a 40%, #0a5c44 100%)' }}>
+                {/* Status bar */}
+                <div className="bg-gray-900/80 h-8 flex items-center justify-center relative z-10">
                   <div className="w-16 h-4 bg-black rounded-full" />
                 </div>
-
-                {/* App header */}
-                <div className="bg-primary-500 px-5 pt-4 pb-5">
-                  <div className="flex justify-between items-center mb-4">
-                    <div>
-                      <p className="text-primary-100 text-[11px] font-medium">Bonjour</p>
-                      <p className="text-white font-bold text-sm">Mon Entreprise</p>
-                    </div>
-                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-xs">M</span>
-                    </div>
-                  </div>
-                  {/* Stats row */}
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {[['CA Mois', '4 250 €'], ['En attente', '3'], ['En retard', '1']].map(([label, val]) => (
-                      <div key={label} className="bg-white/15 rounded-xl p-2 text-center">
-                        <p className="text-primary-100 text-[9px] leading-tight">{label}</p>
-                        <p className="text-white font-bold text-xs mt-0.5">{val}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="px-4 py-3 space-y-2 bg-white/50">
-                  {/* Chart placeholder */}
-                  <div className="bg-white rounded-xl p-3 border border-gray-100">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-[10px] font-bold text-gray-700">Chiffre d'affaires</p>
-                      <TrendingUp size={12} className="text-primary-500" />
-                    </div>
-                    <div className="flex items-end gap-1 h-10">
-                      {[30, 55, 40, 70, 60, 85, 75].map((h, i) => (
-                        <div key={i} className="flex-1 bg-primary-100 rounded-t-sm" style={{ height: `${h}%` }}>
-                          <div className="w-full bg-primary-500 rounded-t-sm" style={{ height: i === 5 ? '100%' : '60%' }} />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <p className="text-[10px] font-bold text-gray-500 px-1">Documents récents</p>
-                  {[
-                    { num: 'FACT-2026-012', client: 'Acme Corp', amount: '2 400 €', color: 'bg-green-500' },
-                    { num: 'FACT-2026-011', client: 'Studio Leo', amount: '1 850 €', color: 'bg-blue-500' },
-                    { num: 'DEVIS-2026-003', client: 'StartupX', amount: '5 000 €', color: 'bg-gray-300' },
-                  ].map((inv) => (
-                    <div key={inv.num} className="bg-white rounded-xl p-2.5 flex items-center gap-2.5 border border-gray-100">
-                      <div className={`w-1.5 h-8 rounded-full ${inv.color}`} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[9px] text-gray-400 font-medium truncate">{inv.num}</p>
-                        <p className="text-xs font-semibold text-gray-800 truncate">{inv.client}</p>
-                      </div>
-                      <span className="text-xs font-bold text-gray-900">{inv.amount}</span>
-                    </div>
-                  ))}
-
-                  {/* Mic button */}
-                  <div className="flex justify-center pt-1">
-                    <div className="w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center shadow-lg shadow-primary-200 animate-bounce-soft">
-                      <Mic size={20} color="white" />
-                    </div>
-                  </div>
-                </div>
+                {/* App screenshot — replace /public/images/app-screenshot.png with your own capture */}
+                <Image
+                  src="/images/app-screenshot.png"
+                  alt="DictaBill — interface de facturation vocale"
+                  fill
+                  className="object-cover object-top"
+                  sizes="280px"
+                  priority
+                />
               </div>
             </div>
 

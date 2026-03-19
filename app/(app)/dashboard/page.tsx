@@ -1,7 +1,8 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
-import { Mic, PenLine, ArrowRight, ArrowUpRight, TrendingUp, Clock, AlertCircle, Menu, Plus } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Mic, PenLine, ArrowRight, ArrowUpRight, TrendingUp, Clock, AlertCircle, Menu, Plus, PartyPopper } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useDataStore } from '@/stores/dataStore';
 import { useT } from '@/hooks/useTranslation';
@@ -67,6 +68,40 @@ function getGreeting() {
   return 'Bonsoir';
 }
 
+function WelcomeBanner() {
+  const searchParams = useSearchParams();
+  const { profile, fetchProfile, user } = useAuthStore();
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('welcome') === '1') {
+      setShow(true);
+      // Refresh le profil pour avoir le nouveau tier Stripe
+      if (user) fetchProfile(user.id);
+      window.history.replaceState({}, '', '/dashboard');
+    }
+  }, [searchParams, user, fetchProfile]);
+
+  if (!show) return null;
+  const tier = profile?.subscription_tier;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -16 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mx-6 md:mx-8 mt-4 bg-[#1D9E75] text-white rounded-2xl px-5 py-4 flex items-center justify-between"
+    >
+      <div className="flex items-center gap-3">
+        <PartyPopper size={20} />
+        <div>
+          <p className="font-black text-sm">Abonnement {tier === 'pro' ? 'Pro' : 'Solo'} activé !</p>
+          <p className="text-xs text-white/80 mt-0.5">Toutes vos fonctionnalités sont désormais débloquées.</p>
+        </div>
+      </div>
+      <button onClick={() => setShow(false)} className="text-white/60 hover:text-white text-lg font-bold ml-4">✕</button>
+    </motion.div>
+  );
+}
+
 export default function DashboardPage() {
   const { lang } = useT();
   const { profile } = useAuthStore();
@@ -86,6 +121,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
+      <Suspense fallback={null}><WelcomeBanner /></Suspense>
       {/* Top bar */}
       <div className="border-b border-gray-100 px-6 md:px-8 py-4 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-sm z-10">
         <div className="flex items-center gap-3">

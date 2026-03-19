@@ -1,15 +1,18 @@
 'use client';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { useT } from '@/hooks/useTranslation';
 import toast from 'react-hot-toast';
+import { Loader2 } from 'lucide-react';
 
-export default function RegisterPage() {
+function RegisterContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextUrl = searchParams.get('next') || '/dashboard';
   const { t } = useT();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -40,7 +43,7 @@ export default function RegisterPage() {
       });
       if (error) throw error;
       toast.success(t('auth.registerBtn'));
-      router.push('/onboarding');
+      router.push('/onboarding?next=' + encodeURIComponent(nextUrl));
     } catch (err: any) {
       toast.error(err.message);
     } finally {
@@ -51,7 +54,7 @@ export default function RegisterPage() {
   const handleGoogle = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/api/auth/callback` },
+      options: { redirectTo: `${window.location.origin}/api/auth/callback?next=${encodeURIComponent('/onboarding?next=' + encodeURIComponent(nextUrl))}` },
     });
   };
 
@@ -136,12 +139,20 @@ export default function RegisterPage() {
 
         <p className="text-center text-sm text-gray-500 mt-6">
           {t('auth.hasAccount')}{' '}
-          <Link href="/login" className="text-primary-600 font-semibold hover:underline">
+          <Link href={`/login?next=${encodeURIComponent(nextUrl)}`} className="text-primary-600 font-semibold hover:underline">
             {t('auth.loginLink')}
           </Link>
         </p>
       </div>
     </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 size={32} className="animate-spin text-primary-500" /></div>}>
+      <RegisterContent />
+    </Suspense>
   );
 }

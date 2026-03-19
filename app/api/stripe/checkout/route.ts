@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       customer: customerId,
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings?success=1`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?welcome=1`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
       metadata: { supabase_uid: user.id, plan, interval },
     });

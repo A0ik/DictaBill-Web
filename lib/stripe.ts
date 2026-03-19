@@ -13,7 +13,7 @@ export const PLANS = {
   solo: {
     name: 'Solo',
     monthlyPrice: 9.99,
-    annualPrice: 99.99,
+    annualPrice: 95.9,
     monthlyPriceId: process.env.NEXT_PUBLIC_STRIPE_SOLO_MONTHLY!,
     annualPriceId: process.env.NEXT_PUBLIC_STRIPE_SOLO_ANNUAL!,
     tier: 'solo' as const,
@@ -25,7 +25,7 @@ export const PLANS = {
   pro: {
     name: 'Pro',
     monthlyPrice: 24.99,
-    annualPrice: 249.99,
+    annualPrice: 239.9,
     monthlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY!,
     annualPriceId: process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL!,
     tier: 'pro' as const,

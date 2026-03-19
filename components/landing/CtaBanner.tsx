@@ -24,7 +24,7 @@ export default function CtaBanner() {
       >
         <motion.h2
           variants={fadeUp}
-          className="text-5xl lg:text-6xl font-black text-white tracking-[-0.03em] leading-tight mb-6"
+          className="text-3xl sm:text-4xl lg:text-6xl font-black text-white tracking-[-0.03em] leading-tight mb-6"
         >
           Votre prochaine facture en 30 secondes.
         </motion.h2>

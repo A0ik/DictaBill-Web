@@ -1,69 +1,109 @@
 "use client";
 import { motion } from "framer-motion";
-import { TestimonialsColumn } from "@/components/ui/testimonials-columns";
 
 const testimonials = [
   {
     text: "Je facturais en fin de journée, souvent le soir tard. Maintenant je le fais dans le taxi en rentrant du client. J'oublie plus jamais de facturer.",
-    image: "https://randomuser.me/api/portraits/women/44.jpg",
+    initials: "CR",
     name: "Camille R.",
-    role: "Consultante SEO, Paris",
+    role: "Consultante SEO",
   },
   {
     text: "J'ai testé par curiosité. Première facture : 28 secondes chrono. C'est la seule façon que j'utilise maintenant.",
-    image: "https://randomuser.me/api/portraits/men/32.jpg",
+    initials: "ML",
     name: "Mehdi L.",
-    role: "Développeur freelance, Lyon",
+    role: "Développeur freelance",
   },
   {
     text: "Mes devis partent le jour même. Avant j'attendais d'avoir du temps pour bien faire — du coup je les envoyais jamais.",
-    image: "https://randomuser.me/api/portraits/women/68.jpg",
+    initials: "LV",
     name: "Lucie V.",
-    role: "Designer UX, remote",
+    role: "Designer UX",
   },
   {
     text: "Le gain de temps est réel. En deux phrases je crée une facture conforme avec TVA, numéro et tout. Mon comptable est bluffé.",
-    image: "https://randomuser.me/api/portraits/men/75.jpg",
+    initials: "TB",
     name: "Thomas B.",
     role: "Photographe indépendant",
   },
   {
     text: "J'avais peur que ce soit un gadget. Après 3 mois, c'est le premier outil que j'ouvre le matin.",
-    image: "https://randomuser.me/api/portraits/women/12.jpg",
+    initials: "IK",
     name: "Inès K.",
     role: "Traductrice freelance",
   },
   {
     text: "Parfait pour les missions courtes. Je facture depuis mon téléphone juste après le call client. Fini les oublis.",
-    image: "https://randomuser.me/api/portraits/men/56.jpg",
+    initials: "RM",
     name: "Raphaël M.",
     role: "Coach professionnel",
   },
   {
     text: "La dictée vocale comprend même mon accent. Les factures sortent bien formatées, conformes à la loi française.",
-    image: "https://randomuser.me/api/portraits/women/90.jpg",
+    initials: "AC",
     name: "Amina C.",
     role: "Consultante RH",
   },
   {
     text: "J'ai réduit le temps passé sur ma compta de moitié. Ce n'est pas grand chose mais en freelance, chaque heure compte.",
-    image: "https://randomuser.me/api/portraits/men/14.jpg",
+    initials: "PD",
     name: "Pierre D.",
     role: "Copywriter B2B",
   },
   {
     text: "Interface claire, zéro fioriture. Exactement ce dont j'avais besoin — pas un Excel déguisé.",
-    image: "https://randomuser.me/api/portraits/women/36.jpg",
+    initials: "ST",
     name: "Sarah T.",
     role: "Motion designer",
   },
 ];
 
-const firstColumn = testimonials.slice(0, 3);
-const secondColumn = testimonials.slice(3, 6);
-const thirdColumn = testimonials.slice(6, 9);
+const COLORS = [
+  "bg-[#1D9E75]",
+  "bg-blue-500",
+  "bg-violet-500",
+  "bg-orange-500",
+  "bg-pink-500",
+  "bg-teal-500",
+  "bg-indigo-500",
+  "bg-amber-500",
+  "bg-rose-500",
+];
+
+function Avatar({ initials, colorClass }: { initials: string; colorClass: string }) {
+  return (
+    <div className={`w-9 h-9 rounded-full ${colorClass} flex items-center justify-center shrink-0`}>
+      <span className="text-white text-xs font-bold">{initials}</span>
+    </div>
+  );
+}
+
+function TestimonialCard({ t, i }: { t: (typeof testimonials)[0]; i: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: (i % 3) * 0.1 }}
+      className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow"
+    >
+      <p className="text-sm text-gray-700 leading-relaxed mb-4">&ldquo;{t.text}&rdquo;</p>
+      <div className="flex items-center gap-3">
+        <Avatar initials={t.initials} colorClass={COLORS[i % COLORS.length]} />
+        <div>
+          <p className="text-sm font-bold text-gray-900">{t.name}</p>
+          <p className="text-xs text-gray-400">{t.role}</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 export default function Testimonials() {
+  const col1 = testimonials.filter((_, i) => i % 3 === 0);
+  const col2 = testimonials.filter((_, i) => i % 3 === 1);
+  const col3 = testimonials.filter((_, i) => i % 3 === 2);
+
   return (
     <section className="py-28 bg-white border-t border-gray-100 overflow-hidden">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -78,14 +118,20 @@ export default function Testimonials() {
             Ce qu&apos;ils en disent.
           </h2>
           <p className="text-gray-500 mt-3 text-base leading-relaxed">
-            1 247 freelances utilisent DictaBill chaque semaine.
+            Des freelances qui ont arrêté de procrastiner leurs factures.
           </p>
         </motion.div>
 
-        <div className="flex justify-start gap-6 [mask-image:linear-gradient(to_bottom,transparent,black_15%,black_85%,transparent)] max-h-[640px] overflow-hidden">
-          <TestimonialsColumn testimonials={firstColumn} duration={18} />
-          <TestimonialsColumn testimonials={secondColumn} className="hidden md:block" duration={22} />
-          <TestimonialsColumn testimonials={thirdColumn} className="hidden lg:block" duration={16} />
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="space-y-4">
+            {col1.map((t, i) => <TestimonialCard key={i} t={t} i={i * 3} />)}
+          </div>
+          <div className="space-y-4 hidden md:block">
+            {col2.map((t, i) => <TestimonialCard key={i} t={t} i={i * 3 + 1} />)}
+          </div>
+          <div className="space-y-4 hidden lg:block">
+            {col3.map((t, i) => <TestimonialCard key={i} t={t} i={i * 3 + 2} />)}
+          </div>
         </div>
       </div>
     </section>

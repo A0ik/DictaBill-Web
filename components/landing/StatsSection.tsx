@@ -1,34 +1,5 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
-import { motion, useInView, type Variants } from 'framer-motion';
-
-function CountUp({ to, suffix = '' }: { to: number; suffix?: string }) {
-  const [value, setValue] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-80px' });
-
-  useEffect(() => {
-    if (!inView) return;
-    let start = 0;
-    const duration = 1400;
-    const step = (timestamp: number) => {
-      if (!start) start = timestamp;
-      const progress = Math.min((timestamp - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setValue(Math.floor(eased * to));
-      if (progress < 1) requestAnimationFrame(step);
-      else setValue(to);
-    };
-    requestAnimationFrame(step);
-  }, [inView, to]);
-
-  return (
-    <span ref={ref}>
-      {value.toLocaleString('fr-FR')}
-      {suffix}
-    </span>
-  );
-}
+import { motion, type Variants } from 'framer-motion';
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -39,7 +10,7 @@ export default function StatsSection() {
   return (
     <section className="bg-gray-50 py-20">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           {/* Left: big featured stat */}
           <motion.div
             variants={fadeUp}
@@ -48,15 +19,15 @@ export default function StatsSection() {
             viewport={{ once: true, margin: '-80px' }}
           >
             <p className="text-xs uppercase tracking-widest text-gray-400 font-medium mb-6">
-              DictaBill en chiffres
+              DictaBill en bref
             </p>
             <p className="text-6xl font-black text-[#0D0D0D] leading-none mb-3">
-              <CountUp to={14800} />
+              &lt;&nbsp;1&nbsp;min
             </p>
-            <p className="text-gray-500 text-base">factures créées par nos freelances</p>
+            <p className="text-gray-500 text-base">pour créer une facture complète, du premier mot au PDF</p>
           </motion.div>
 
-          {/* Right: 3 smaller stats */}
+          {/* Right: 3 product facts */}
           <motion.div
             variants={{
               hidden: {},
@@ -68,9 +39,9 @@ export default function StatsSection() {
             className="space-y-7"
           >
             {[
-              { value: '28 sec', label: 'temps moyen de création' },
-              { value: '4,8/5', label: 'note moyenne utilisateurs' },
-              { value: '94 %', label: 'taux de conformité légale' },
+              { value: '3 types', label: 'facture, devis, avoir — dans la même app' },
+              { value: 'Factur-X', label: 'e-facturation obligatoire dès 2026 (EN 16931)' },
+              { value: 'FR + EN', label: 'interface et génération bilingue' },
             ].map((stat, i) => (
               <motion.div
                 key={i}

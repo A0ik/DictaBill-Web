@@ -29,7 +29,7 @@ export default function AppPreviewSection() {
   return (
     <section className="py-24 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           {/* Left — feature list */}
           <div>
             <p className="text-xs font-bold text-primary-600 bg-primary-50 border border-primary-100 px-3 py-1.5 rounded-full inline-block mb-5 uppercase tracking-widest">
@@ -75,7 +75,7 @@ export default function AppPreviewSection() {
           </div>
 
           {/* Right — App screenshot */}
-          <div className="relative flex justify-center lg:justify-end">
+          <div className="relative flex justify-center lg:justify-end pb-6 lg:pb-0">
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200 w-full max-w-md">
               {/* Browser chrome */}
               <div className="bg-gray-100 px-4 py-3 flex items-center gap-2 border-b border-gray-200">

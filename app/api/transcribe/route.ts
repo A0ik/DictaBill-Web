@@ -2,6 +2,37 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
+// Rate limiting : anonyme=10/h, authentifié=60/h (par user_id ou IP)
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+function getIdentifier(request: NextRequest): { id: string; limit: number } {
+  const auth = request.headers.get('authorization');
+  if (auth?.startsWith('Bearer ')) {
+    try {
+      const parts = auth.slice(7).split('.');
+      if (parts.length === 3) {
+        const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
+        if (payload?.sub) return { id: `user:${payload.sub}`, limit: 60 };
+      }
+    } catch {}
+  }
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+  return { id: `ip:${ip}`, limit: 10 };
+}
+
+function checkRateLimit(request: NextRequest): { allowed: boolean; limit: number } {
+  const { id, limit } = getIdentifier(request);
+  const now = Date.now();
+  const entry = rateLimitMap.get(id);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(id, { count: 1, resetAt: now + 3_600_000 });
+    return { allowed: true, limit };
+  }
+  if (entry.count >= limit) return { allowed: false, limit };
+  entry.count++;
+  return { allowed: true, limit };
+}
+
 // OpenRouter helper — falls back to Groq LLaMA if no OpenRouter key
 async function extractWithLLM(transcript: string, today: string): Promise<any> {
   const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
@@ -83,6 +114,14 @@ Règles :
 }
 
 export async function POST(request: NextRequest) {
+  const { allowed, limit } = checkRateLimit(request);
+  if (!allowed) {
+    return NextResponse.json(
+      { error: `Limite atteinte. Maximum ${limit} transcriptions par heure.` },
+      { status: 429 },
+    );
+  }
+
   const GROQ_API_KEY = process.env.GROQ_API_KEY;
   if (!GROQ_API_KEY) {
     return NextResponse.json({ error: 'GROQ_API_KEY not configured' }, { status: 500 });

@@ -37,7 +37,7 @@ export default function Hero() {
           {/* Main headline */}
           <motion.h1
             variants={fadeUp}
-            className="text-6xl sm:text-7xl lg:text-[88px] font-black tracking-[-0.04em] leading-[0.92] mb-8"
+            className="text-[2.75rem] sm:text-6xl md:text-7xl lg:text-[88px] font-black tracking-[-0.04em] leading-[0.92] mb-8"
           >
             <span className="block text-gray-400">Vous avez mieux à faire</span>
             <span className="block text-[#0D0D0D] relative">
@@ -91,9 +91,9 @@ export default function Hero() {
             </button>
           </motion.div>
 
-          {/* Social proof */}
+          {/* Trust line */}
           <motion.p variants={fadeUp} className="text-sm text-gray-400">
-            Déjà utilisé par <span className="text-gray-700 font-semibold">1 247 freelances</span> en France
+            Sans carte bancaire · Facturation vocale · Conforme loi française
           </motion.p>
         </motion.div>
 

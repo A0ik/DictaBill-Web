@@ -58,7 +58,7 @@ export default function HowItWorks() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: '-60px' }}
-          className="grid md:grid-cols-3 gap-12"
+          className="grid md:grid-cols-3 gap-8 md:gap-12"
         >
           {STEPS.map((step) => (
             <motion.div key={step.num} variants={stepVariant} whileHover={{ y: -8, transition: { duration: 0.25 } }} className="flex flex-col cursor-default">

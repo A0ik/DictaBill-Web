@@ -6,7 +6,7 @@ import StatsSection from '@/components/landing/StatsSection';
 import Features from '@/components/landing/Features';
 import HowItWorks from '@/components/landing/HowItWorks';
 import AppPreviewSection from '@/components/landing/AppPreviewSection';
-import Testimonials from '@/components/landing/Testimonials';
+import FaqSection from '@/components/landing/FaqSection';
 import PricingAnimated from '@/components/landing/PricingAnimated';
 import CtaBanner from '@/components/landing/CtaBanner';
 import Footer from '@/components/landing/Footer';
@@ -24,7 +24,7 @@ export default function LandingPage() {
         <Features />
         <HowItWorks />
         <AppPreviewSection />
-        <Testimonials />
+        <FaqSection />
         <PricingAnimated />
         <CtaBanner />
       </main>
